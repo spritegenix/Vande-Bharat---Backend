@@ -1,0 +1,92 @@
+// Page related models
+model Page {
+    id                 String    @id @default(uuid())
+    slug               String?   @unique
+    name               String
+    description        String?
+    banner             String?
+    avatar             String?
+    pageContactDetails Json?
+    isDefault          Boolean   @default(false) // Enforce only one default per user
+    isHidden           Boolean   @default(false)
+    isBlocked          Boolean   @default(false)
+    createdAt          DateTime  @default(now())
+    updatedAt          DateTime  @updatedAt
+    deletedAt          DateTime?
+
+    ownerId String
+    owner   User   @relation("PageOwner", fields: [ownerId], references: [id])
+
+    followers   PageFollower[]
+    posts       Post[]         @relation("PagePosts")
+    products    Product[]
+    categories  Category[]
+    tags        Tag[]
+    addresses   Address[]
+    donations   Donation[]
+    reports     Report[]
+    pageHistory PageHistory[]
+
+    @@index([ownerId])
+    @@map("pages")
+}
+
+model PageFollower {
+    id        String    @id @default(uuid())
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+
+    userId              String
+    user                User                  @relation(fields: [userId], references: [id])
+    pageId              String
+    page                Page                  @relation(fields: [pageId], references: [id])
+    pageFollowerHistory PageFollowerHistory[]
+
+    @@unique([userId, pageId])
+    @@index([userId])
+    @@index([pageId])
+    @@map("page_followers")
+}
+
+// History table for Page (tracks changes over time)
+model PageHistory {
+    id                 String    @id @default(uuid())
+    pageId             String // Foreign key to Page
+    slug               String?
+    name               String?
+    description        String?
+    banner             String?
+    avatar             String?
+    pageContactDetails Json?
+    isDefault          Boolean?
+    idHidden           Boolean?
+    isBlocked          Boolean?
+    createdAt          DateTime?
+    updatedAt          DateTime?
+    deletedAt          DateTime?
+
+    ownerId String?
+
+    page Page @relation(fields: [pageId], references: [id])
+
+    @@index([pageId])
+    @@map("page_histories")
+}
+
+// History table for PageFollower (tracks changes over time)
+model PageFollowerHistory {
+    id             String    @id @default(uuid())
+    pageFollowerId String // Foreign key to PageFollower
+    createdAt      DateTime?
+    updatedAt      DateTime?
+    deletedAt      DateTime?
+
+    userId String?
+    pageId String?
+
+    pageFollower PageFollower @relation(fields: [pageFollowerId], references: [id])
+
+    @@index([pageFollowerId])
+    @@map("page_follower_histories")
+}

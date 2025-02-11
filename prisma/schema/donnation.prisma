@@ -1,0 +1,47 @@
+model Donation {
+    id          String         @id @default(uuid())
+    amount      Decimal        @db.Decimal(10, 2) // Added missing amount field
+    description Json?
+    status      DonationStatus @default(PENDING)
+    razorpayId  String?        @unique
+    createdAt   DateTime       @default(now())
+    updatedAt   DateTime       @updatedAt
+    deletedAt   DateTime?
+
+    userId          String
+    user            User              @relation(fields: [userId], references: [id])
+    pageId          String
+    page            Page              @relation(fields: [pageId], references: [id])
+    donationHistory DonationHistory[]
+
+    @@index([userId])
+    @@index([pageId])
+    @@map("donations")
+}
+
+enum DonationStatus {
+    PENDING
+    PAID
+}
+
+model DonationHistory {
+    id          String   @id @default(uuid()) // Unique ID for historical records
+    donationId  String // Foreign key to Donation
+    amount      Decimal?
+    description Json?
+    status      String?
+    razorpayId  String?
+
+    createdAt DateTime?
+    updatedAt DateTime?
+    deletedAt DateTime? // Soft deletion for history
+
+    userId String?
+    pageId String?
+
+    // Foreign key relationship with Donation
+    donation Donation @relation(fields: [donationId], references: [id])
+
+    @@index([donationId])
+    @@map("donation_histories")
+}

@@ -1,0 +1,45 @@
+model Notification {
+    id        String           @id @default(uuid())
+    type      NotificationType
+    message   String
+    readAt    DateTime?
+    createdAt DateTime         @default(now())
+    updatedAt DateTime         @updatedAt
+    deletedAt DateTime?
+
+    // Relationships
+    userId              String?
+    user                User?                 @relation(fields: [userId], references: [id])
+    notificationHistory NotificationHistory[]
+
+    @@index([userId])
+    @@map("notifications")
+}
+
+enum NotificationType {
+    SYSTEM
+    COMMENT
+    REACTION
+    FOLLOW
+    ORDER_UPDATE
+}
+
+// History table for Notification (tracks changes over time)
+model NotificationHistory {
+    id             String    @id @default(uuid())
+    notificationId String // Foreign key to Notification
+    type           String?
+    message        String?
+    readAt         DateTime?
+
+    createdAt DateTime?
+    updatedAt DateTime?
+    deletedAt DateTime? // Soft deletion for history
+
+    notification Notification @relation(fields: [notificationId], references: [id])
+
+    userId String?
+
+    @@index([notificationId])
+    @@map("notification_histories")
+}

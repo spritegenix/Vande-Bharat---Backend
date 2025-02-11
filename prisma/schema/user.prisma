@@ -1,0 +1,134 @@
+// Base user model
+model User {
+    id        String  @id @default(uuid())
+    hash      String?
+    isHidden  Boolean @default(false)
+    isBlocked Boolean @default(false)
+
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+
+    // Relations
+    ipAddresses   IpAddress[]
+    credentials   Credential[] // Renamed from userCredentials for consistency
+    comments      Comment[]
+    reactions     Reaction[]
+    ownedGroups   Group[]        @relation("GroupOwner")
+    groupMembers  GroupMember[]
+    ownedPages    Page[]         @relation("PageOwner")
+    pageFollowers PageFollower[]
+    orders        Order[]
+    cartItems     CartItem[] // Renamed from cart for consistency
+    donations     Donation[] // Added missing relation
+    bookmarks     Bookmark[]
+    reports       Report[]
+    notifications Notification[]
+    userHistory   UserHistory[]
+
+    @@map("users")
+}
+
+model IpAddress {
+    id        String    @id @default(uuid())
+    ipV4      String?
+    ipV6      String?
+    timestamp DateTime? @map("time") // Renamed for clarity
+
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+
+    userId           String
+    user             User               @relation(fields: [userId], references: [id])
+    ipAddressHistory IpAddressHistory[]
+
+    @@index([userId])
+    @@map("ip_addresses")
+}
+
+model Credential {
+    id           String         @id @default(uuid())
+    type         CredentialType
+    value        String         @unique
+    isVerified   Boolean?       @default(false)
+    isPrimary    Boolean?       @default(false)
+    verifiedAt   DateTime?
+    order        Int?
+    otp          String?
+    otpExpiresAt DateTime?
+
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+
+    userId            String
+    user              User                @relation(fields: [userId], references: [id])
+    credentialHistory CredentialHistory[]
+
+    @@index([userId])
+    @@map("credentials")
+}
+
+enum CredentialType {
+    EMAIL
+    PHONE
+}
+
+model UserHistory {
+    id        String   @id @default(uuid())
+    userId    String // Reference to original user
+    hash      String?
+    salt      String?
+    isHidden  Boolean?
+    isBlocked Boolean?
+
+    createdAt DateTime?
+    updatedAt DateTime?
+    deletedAt DateTime?
+
+    user User @relation(fields: [userId], references: [id])
+
+    @@map("user_histories")
+}
+
+model IpAddressHistory {
+    id          String    @id @default(uuid())
+    ipAddressId String
+    ipV4        String?
+    ipV6        String?
+    timestamp   DateTime?
+
+    createdAt DateTime?
+    updatedAt DateTime?
+    deletedAt DateTime?
+
+    userId String?
+
+    ipAddress IpAddress @relation(fields: [ipAddressId], references: [id])
+
+    @@map("ip_address_histories")
+}
+
+model CredentialHistory {
+    id           String    @id @default(uuid())
+    credentialId String
+    type         String?
+    value        String?
+    isVerified   Boolean?
+    isPrimary    Boolean?
+    verifiedAt   DateTime?
+    order        Int?
+    otp          String?
+    otpExpiresAt DateTime?
+
+    createdAt DateTime?
+    updatedAt DateTime?
+    deletedAt DateTime?
+
+    userId String?
+
+    credential Credential @relation(fields: [credentialId], references: [id])
+
+    @@map("credential_histories")
+}

@@ -1,0 +1,98 @@
+// Group related models
+model Group {
+    id          String       @id @default(uuid())
+    slug        String?      @unique
+    name        String
+    description Json?
+    privacy     GroupPrivacy @default(PUBLIC)
+    isHidden    Boolean      @default(false)
+    banner      String?
+    createdAt   DateTime     @default(now())
+    updatedAt   DateTime     @updatedAt
+    deletedAt   DateTime?
+
+    owner      User      @relation("GroupOwner", fields: [ownerId], references: [id])
+    ownerId    String
+    category   Category? @relation(fields: [categoryId], references: [id])
+    categoryId String?
+
+    members      GroupMember[]
+    posts        Post[]         @relation("GroupPosts")
+    tags         Tag[]
+    reports      Report[]
+    addresses    Address[]
+    groupHistory GroupHistory[]
+
+    @@index([ownerId])
+    @@map("groups")
+}
+
+enum GroupPrivacy {
+    PRIVATE
+    PUBLIC
+}
+
+model GroupMember {
+    id        String       @id @default(uuid())
+    status    MemberStatus @default(PENDING)
+    createdAt DateTime     @default(now())
+    updatedAt DateTime     @updatedAt
+    deletedAt DateTime?
+
+    userId             String
+    user               User                 @relation(fields: [userId], references: [id])
+    groupId            String
+    group              Group                @relation(fields: [groupId], references: [id])
+    groupMemberHistory GroupMemberHistory[]
+
+    @@unique([userId, groupId])
+    @@index([userId])
+    @@index([groupId])
+    @@map("group_members")
+}
+
+enum MemberStatus {
+    PENDING
+    ACCEPTED
+    REJECTED
+}
+
+// History table for Group (tracks changes over time)
+model GroupHistory {
+    id          String    @id @default(uuid())
+    groupId     String // Foreign key to Group
+    slug        String? // Track slug for group
+    name        String?
+    description Json?
+    privacy     String?
+    banner      String?
+    createdAt   DateTime?
+    updatedAt   DateTime?
+    deletedAt   DateTime? // Soft deletion for history
+
+    ownerId    String?
+    categoryId String?
+
+    group Group @relation(fields: [groupId], references: [id])
+
+    @@index([groupId])
+    @@map("group_histories")
+}
+
+// History table for GroupMember (tracks changes over time)
+model GroupMemberHistory {
+    id            String    @id @default(uuid())
+    groupMemberId String // Foreign key to GroupMember
+    status        String?
+    createdAt     DateTime?
+    updatedAt     DateTime?
+    deletedAt     DateTime? // Soft deletion for history
+
+    userId  String?
+    groupId String?
+
+    groupMember GroupMember @relation(fields: [groupMemberId], references: [id])
+
+    @@index([groupMemberId])
+    @@map("group_member_histories")
+}

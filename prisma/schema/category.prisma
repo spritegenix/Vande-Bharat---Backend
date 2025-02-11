@@ -1,0 +1,89 @@
+// Category system
+model Category {
+    id          String  @id @default(uuid())
+    slug        String? @unique
+    name        String
+    icon        String?
+    description String?
+
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+
+    parentId String?
+    parent   Category? @relation("CategoryHierarchy", fields: [parentId], references: [id])
+
+    children        Category[]        @relation("CategoryHierarchy")
+    pages           Page[]
+    groups          Group[]
+    categoryHistory CategoryHistory[]
+
+    @@index([parentId])
+    @@map("categories")
+}
+
+model ProductCategory {
+    id          String  @id @default(uuid())
+    slug        String? @unique
+    name        String
+    icon        String?
+    description String?
+
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+
+    parentId String?
+    parent   ProductCategory? @relation("CategoryHierarchy", fields: [parentId], references: [id])
+
+    children               ProductCategory[]        @relation("CategoryHierarchy")
+    products               Product[]
+    productCategoryHistory ProductCategoryHistory[]
+
+    @@index([parentId])
+    @@map("product_categories")
+}
+
+// Historical table for Categories (to track versioning)
+model CategoryHistory {
+    id          String  @id @default(uuid()) // Unique ID for historical records
+    categoryId  String // Foreign key to Category
+    slug        String?
+    name        String?
+    icon        String?
+    description String?
+
+    createdAt DateTime?
+    updatedAt DateTime?
+    deletedAt DateTime? // Soft deletion for history
+
+    parentId String?
+
+    // Foreign key relationship with Category
+    category Category @relation(fields: [categoryId], references: [id])
+
+    @@index([categoryId])
+    @@map("category_histories")
+}
+
+// Historical table for Product Categories (to track versioning)
+model ProductCategoryHistory {
+    id                String  @id @default(uuid()) // Unique ID for historical records
+    productCategoryId String // Foreign key to ProductCategory
+    slug              String?
+    name              String?
+    icon              String?
+    description       String?
+
+    createdAt DateTime?
+    updatedAt DateTime?
+    deletedAt DateTime? // Soft deletion for history
+
+    parentId String?
+
+    // Foreign key relationship with ProductCategory
+    productCategory ProductCategory @relation(fields: [productCategoryId], references: [id])
+
+    @@index([productCategoryId])
+    @@map("product_category_histories")
+}

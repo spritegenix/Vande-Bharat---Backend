@@ -1,0 +1,31 @@
+// Tagging system
+model Tag {
+    id        String    @id @default(uuid())
+    name      String    @unique
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+
+    posts      Post[]
+    groups     Group[]
+    pages      Page[]
+    products   Product[]
+    comments   Comment[]
+    tagHistory TagHistory[]
+
+    @@map("tags")
+}
+
+model TagHistory {
+    id    String  @id @default(uuid()) // Unique ID for history records
+    tagId String // Reference to the original tag
+    name  String?
+
+    createdAt DateTime?
+    updatedAt DateTime?
+    deletedAt DateTime?
+
+    tag Tag @relation(fields: [tagId], references: [id])
+
+    @@map("tag_histories")
+}

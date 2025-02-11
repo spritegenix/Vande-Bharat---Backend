@@ -1,0 +1,73 @@
+model Report {
+    id      String  @id @default(uuid())
+    message String?
+
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+
+    type          ReportType?     @relation(fields: [reportTypeId], references: [id])
+    reportTypeId  String?
+    user          User?           @relation(fields: [userId], references: [id])
+    userId        String?
+    page          Page?           @relation(fields: [pageId], references: [id])
+    pageId        String?
+    group         Group?          @relation(fields: [groupId], references: [id])
+    groupId       String?
+    post          Post?           @relation(fields: [postId], references: [id])
+    postId        String?
+    comment       Comment?        @relation(fields: [commentId], references: [id])
+    commentId     String?
+    reportHistory ReportHistory[]
+
+    @@map("reports")
+}
+
+model ReportType {
+    id   String @id @default(uuid())
+    name String
+
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+
+    reports           Report[]
+    reportTypeHistory ReportTypeHistory[]
+
+    @@map("reportTypes")
+}
+
+model ReportHistory {
+    id       String  @id @default(uuid()) // Unique ID for historical records
+    reportId String // Reference to the original report
+    message  String?
+
+    createdAt DateTime?
+    updatedAt DateTime?
+    deletedAt DateTime?
+
+    reportTypeId String?
+    userId       String?
+    pageId       String?
+    groupId      String?
+    postId       String?
+    commentId    String?
+
+    report Report @relation(fields: [reportId], references: [id])
+
+    @@map("report_histories")
+}
+
+model ReportTypeHistory {
+    id           String  @id @default(uuid())
+    reportTypeId String
+    name         String?
+
+    createdAt DateTime?
+    updatedAt DateTime?
+    deletedAt DateTime?
+
+    reportTypes ReportType @relation(fields: [reportTypeId], references: [id])
+
+    @@map("report_types_histories")
+}

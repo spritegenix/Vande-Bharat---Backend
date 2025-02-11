@@ -1,0 +1,46 @@
+model Address {
+    id        String    @id @default(uuid())
+    order     Int?
+    street    String?
+    city      String?
+    state     String?
+    country   String?
+    pincode   String?
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
+
+    page           Page?            @relation(fields: [pageId], references: [id])
+    pageId         String?
+    group          Group?           @relation(fields: [groupId], references: [id])
+    groupId        String?
+    post           Post?            @relation(fields: [postId], references: [id])
+    postId         String?          @unique
+    addressHistory AddressHistory[]
+
+    @@index([pageId])
+    @@index([groupId])
+    @@index([postId])
+    @@map("addresses")
+}
+
+model AddressHistory {
+    id        String  @id @default(uuid()) // Unique ID for the historical record
+    addressId String // Foreign key to the original Address model
+    order     Int?
+    street    String?
+    city      String?
+    state     String?
+    country   String?
+    pincode   String?
+
+    createdAt DateTime?
+    updatedAt DateTime?
+    deletedAt DateTime? // For historical soft deletion status
+
+    // Foreign key relationship with the main Address
+    address Address @relation(fields: [addressId], references: [id])
+
+    @@index([addressId])
+    @@map("address_histories")
+}
