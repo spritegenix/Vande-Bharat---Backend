@@ -1,15 +1,18 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, UseGuards, UseInterceptors } from '@nestjs/common';
 import { JwtGuard } from '../auth/guard';
 import { UserService } from './user.service';
 import { GetUser } from '../auth/decorator';
 import { User } from '@prisma/client';
+import { ZodResponseInterceptor } from '@app/interceptors/zod';
+import { UserMeResponseDto } from '@app/dtos';
 
 @Controller('user')
 @UseGuards(JwtGuard)
 export class UserController {
   constructor(private readonly userService: UserService) {}
+  @UseInterceptors(new ZodResponseInterceptor(UserMeResponseDto, true))
   @Get('me')
-  getMe(@GetUser() user: User) {
-    return this.userService.userMe(user);
+  async getMe(@GetUser() user: User) {
+    return await this.userService.userMe(user);
   }
 }

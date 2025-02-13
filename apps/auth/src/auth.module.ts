@@ -18,7 +18,7 @@ import {
     PrismaModule,
     JwtModule.register({}),
     ConfigModule.forRoot({
-      isGlobal: true, // ✅ Makes ConfigService available across the app
+      isGlobal: true,
     }),
   ],
   controllers: [AuthController],

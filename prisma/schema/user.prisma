@@ -1,9 +1,10 @@
 // Base user model
 model User {
-    id        String  @id @default(uuid())
-    hash      String?
-    isHidden  Boolean @default(false)
-    isBlocked Boolean @default(false)
+    id         String  @id @default(uuid())
+    hash       String?
+    isVerified Boolean @default(false)
+    isHidden   Boolean @default(false)
+    isBlocked  Boolean @default(false)
 
     createdAt DateTime  @default(now())
     updatedAt DateTime  @updatedAt
@@ -76,12 +77,12 @@ enum CredentialType {
 }
 
 model UserHistory {
-    id        String   @id @default(uuid())
-    userId    String // Reference to original user
-    hash      String?
-    salt      String?
-    isHidden  Boolean?
-    isBlocked Boolean?
+    id         String   @id @default(uuid())
+    userId     String // Reference to original user
+    hash       String?
+    isVerified Boolean  @default(false)
+    isHidden   Boolean?
+    isBlocked  Boolean?
 
     createdAt DateTime?
     updatedAt DateTime?

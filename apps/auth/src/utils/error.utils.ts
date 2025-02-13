@@ -1,35 +1,58 @@
-import {
-  ConflictException,
-  InternalServerErrorException,
-  Injectable,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import * as Exception from '@nestjs/common/exceptions';
 import { RpcException } from '@nestjs/microservices';
-import { Prisma } from '@prisma/client';
+import * as PrismaExceptions from '@prisma/client/extension';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 @Injectable()
 export class ErrorUtil {
-  handleError(error: Error) {
-    // Handle Prisma Unique Constraint Violation (Duplicate Entry)
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === 'P2002'
-    ) {
-      throw new RpcException(
-        new ConflictException(`Duplicate field error: ${error.meta?.target}`),
+  private static readonly httpExceptions: Record<number, any> = (() => {
+    return Object.keys(Exception)
+      .filter((key) => key.endsWith('Exception'))
+      .reduce(
+        (acc, key) => {
+          const exception = (Exception as any)[key];
+          if (exception && exception.prototype?.getStatus) {
+            acc[new exception().getStatus()] = exception;
+          }
+          return acc;
+        },
+        {} as Record<number, any>,
       );
-    }
+  })();
 
-    // Handle Prisma Other Errors (like `P2025` for record not found)
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      throw new RpcException(
-        new InternalServerErrorException(`Database error: ${error.message}`),
+  private static readonly prismaExceptions: Record<string, any> = (() => {
+    return Object.keys(PrismaExceptions)
+      .filter((key) => key.startsWith('P')) // Filter Prisma error codes
+      .reduce(
+        (acc, key) => {
+          acc[key] = PrismaExceptions[key];
+          return acc;
+        },
+        {} as Record<string, any>,
       );
+  })();
+
+  handleError(error: unknown) {
+    // Handle Prisma Errors using PrismaExceptions dynamically
+    if (error instanceof PrismaClientKnownRequestError) {
+      const exceptionData = ErrorUtil.prismaExceptions[error.code];
+      if (exceptionData) {
+        const ExceptionClass =
+          ErrorUtil.httpExceptions[exceptionData.status] ||
+          Exception.InternalServerErrorException;
+        throw new ExceptionClass(
+          `${exceptionData.message}: ${error.meta?.target || 'unknown'}`,
+        );
+      }
     }
 
     // Handle Unexpected Errors
     if (!(error instanceof Error)) {
       throw new RpcException(
-        new InternalServerErrorException('An unexpected error occurred'),
+        new Exception.InternalServerErrorException(
+          'An unexpected error occurred',
+        ),
       );
     }
 
@@ -40,7 +63,9 @@ export class ErrorUtil {
 
     // Default Fallback
     throw new RpcException(
-      new InternalServerErrorException('An unexpected server error occurred'),
+      new Exception.InternalServerErrorException(
+        'An unexpected server error occurred',
+      ),
     );
   }
 }

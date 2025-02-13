@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { SignupDto, VerifyOtpDto } from '@app/contracts';
 import { ForbiddenException } from '@nestjs/common';
+import { SignupRequestDto, VerifyOtpRequestDto } from '@app/dtos';
 
 describe('AuthController', () => {
   let authController: AuthController;
@@ -35,7 +35,7 @@ describe('AuthController', () => {
   });
 
   it('should call signup and return response', async () => {
-    const dto: SignupDto = {
+    const dto: SignupRequestDto = {
       email: 'test@example.com',
       password: 'password',
       name: 'Test Page',
@@ -53,7 +53,7 @@ describe('AuthController', () => {
       .fn()
       .mockRejectedValue(new ForbiddenException('Invalid or expired OTP'));
 
-    const dto: VerifyOtpDto = {
+    const dto: VerifyOtpRequestDto = {
       email: 'test@example.com',
       otp: '999999', // ❌ Incorrect OTP
     };
@@ -68,7 +68,7 @@ describe('AuthController', () => {
       credentials: [{ isVerified: true }],
     });
 
-    const dto: VerifyOtpDto = {
+    const dto: VerifyOtpRequestDto = {
       email: 'test@example.com',
       otp: '123456', // ✅ Correct OTP
     };
@@ -89,7 +89,7 @@ describe('AuthController', () => {
       .fn()
       .mockRejectedValue(new ForbiddenException('Credentials already in use'));
 
-    const dto: SignupDto = {
+    const dto: SignupRequestDto = {
       email: 'test@example.com',
       password: 'password',
       name: 'Test Page',

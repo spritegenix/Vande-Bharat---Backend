@@ -3,6 +3,7 @@ model Admin {
     email  String  @unique
     name   String
     avatar String?
+    hash   String
 
     createdAt DateTime  @default(now())
     updatedAt DateTime  @updatedAt
@@ -37,6 +38,7 @@ model AdminHistory {
     email   String?
     name    String?
     avatar  String?
+    hash    String
 
     createdAt DateTime?
     updatedAt DateTime?

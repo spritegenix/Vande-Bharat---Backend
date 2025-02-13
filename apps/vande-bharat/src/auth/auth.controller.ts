@@ -1,23 +1,45 @@
-import { Controller, Post, Body, Get } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Get,
+  UsePipes,
+  UseInterceptors,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto, SignupDto, VerifyOtpDto } from '@app/contracts';
+import {
+  LoginRequestDto,
+  LoginResponseDto,
+  SignupRequestDto,
+  SignupResponseDto,
+  VerifyOtpRequestDto,
+  VerifyOtpResponseDto,
+} from '@app/dtos';
+import { ZodValidationPipe } from '@app/pipes/zod';
+import { ZodResponseInterceptor } from '@app/interceptors/zod';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('signup')
-  async signup(@Body() dto: SignupDto) {
-    return this.authService.signup(dto);
+  @UsePipes(new ZodValidationPipe(SignupRequestDto))
+  @UseInterceptors(new ZodResponseInterceptor(SignupResponseDto, true))
+  async signup(@Body() dto: SignupRequestDto) {
+    return await this.authService.signup(dto);
   }
 
   @Post('verify-otp')
-  async verifyOtp(@Body() dto: VerifyOtpDto) {
-    return this.authService.verifyOtp(dto);
+  @UsePipes(new ZodValidationPipe(VerifyOtpRequestDto))
+  @UseInterceptors(new ZodResponseInterceptor(VerifyOtpResponseDto, true))
+  async verifyOtp(@Body() dto: VerifyOtpRequestDto) {
+    return await this.authService.verifyOtp(dto);
   }
 
   @Get('login')
-  async login(@Body() dto: LoginDto) {
-    return this.authService.login(dto);
+  @UsePipes(new ZodValidationPipe(LoginRequestDto))
+  @UseInterceptors(new ZodResponseInterceptor(LoginResponseDto, true))
+  async login(@Body() dto: LoginRequestDto) {
+    return await this.authService.login(dto);
   }
 }
