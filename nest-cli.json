@@ -37,13 +37,31 @@
         "tsConfigPath": "libs/prisma/tsconfig.lib.json"
       }
     },
-    "contracts": {
+    "dtos": {
       "type": "library",
-      "root": "libs/contracts",
+      "root": "libs/dtos",
       "entryFile": "index",
-      "sourceRoot": "libs/contracts/src",
+      "sourceRoot": "libs/dtos/src",
       "compilerOptions": {
-        "tsConfigPath": "libs/contracts/tsconfig.lib.json"
+        "tsConfigPath": "libs/dtos/tsconfig.lib.json"
+      }
+    },
+    "pipes": {
+      "type": "library",
+      "root": "libs/pipes",
+      "entryFile": "index",
+      "sourceRoot": "libs/pipes/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/pipes/tsconfig.lib.json"
+      }
+    },
+    "interceptors": {
+      "type": "library",
+      "root": "libs/interceptors",
+      "entryFile": "index",
+      "sourceRoot": "libs/interceptors/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/interceptors/tsconfig.lib.json"
       }
     }
   }

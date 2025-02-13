@@ -4,8 +4,6 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-
-import { ConfigService } from '@nestjs/config';
 import {
   CredentialUtil,
   ErrorUtil,
@@ -17,18 +15,17 @@ import {
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@app/prisma';
 import {
-  LoginDto,
-  SignupDto,
-  ValidateTokenDto,
-  VerifyOtpDto,
-} from '@app/contracts';
+  LoginRequestDto,
+  SignupRequestDto,
+  ValidateTokenRequestDto,
+  VerifyOtpRequestDto,
+} from '@app/dtos';
 
 @Injectable()
 export class AuthService {
   constructor(
     private errorUtil: ErrorUtil,
     private prisma: PrismaService,
-    private config: ConfigService,
     private jwtUtil: JwtUtil,
     private otpUtil: OtpUtil,
     private passwordUtil: PasswordUtil,
@@ -36,12 +33,13 @@ export class AuthService {
     private slugUtil: SlugUtil,
   ) {}
 
-  async signup(dto: SignupDto) {
+  async signup(dto: SignupRequestDto) {
     try {
       return await this.prisma.$transaction(async (tx) => {
         const contactConditions: Prisma.CredentialWhereInput = {
           value: dto.email || dto.phone,
           isVerified: true,
+          verifiedAt: { not: null },
           deletedAt: null,
         };
 
@@ -99,7 +97,7 @@ export class AuthService {
     }
   }
 
-  async verifyOtp(dto: VerifyOtpDto) {
+  async verifyOtp(dto: VerifyOtpRequestDto) {
     try {
       const credential = await this.otpUtil.verifyOtp(
         dto.email || dto.phone,
@@ -123,6 +121,7 @@ export class AuthService {
               where: { id: credential.id },
               data: {
                 isVerified: true,
+                verifiedAt: new Date(),
                 otp: null, // Clear OTP after verification
                 otpExpiresAt: null,
               },
@@ -137,15 +136,17 @@ export class AuthService {
         },
         include: {
           credentials: {
-            where: { isVerified: true, deletedAt: null },
+            where: {
+              isVerified: true,
+              verifiedAt: { not: null },
+              deletedAt: null,
+            },
           },
           ownedPages: {
             where: { isDefault: true, deletedAt: null },
           },
         },
       });
-
-      delete user.hash;
 
       return {
         ...user,
@@ -160,7 +161,7 @@ export class AuthService {
     }
   }
 
-  async login(dto: LoginDto) {
+  async login(dto: LoginRequestDto) {
     try {
       const value = dto.email || dto.phone;
       const existingUser = await this.prisma.user.findFirst({
@@ -169,13 +170,19 @@ export class AuthService {
             some: {
               value,
               isVerified: true,
+              verifiedAt: { not: null },
               deletedAt: null,
             },
           },
         },
         include: {
           credentials: {
-            where: { value, isVerified: true, deletedAt: null },
+            where: {
+              value,
+              isVerified: true,
+              verifiedAt: { not: null },
+              deletedAt: null,
+            },
           },
           ownedPages: { where: { isDefault: true, deletedAt: null } },
         },
@@ -191,8 +198,6 @@ export class AuthService {
         throw new ForbiddenException('Invalid credentials');
       }
 
-      delete existingUser.hash;
-
       return {
         ...existingUser,
         token: await this.jwtUtil.signToken(
@@ -206,7 +211,7 @@ export class AuthService {
     }
   }
 
-  async validateToken(dto: ValidateTokenDto) {
+  async validateToken(dto: ValidateTokenRequestDto) {
     try {
       const payload = await this.jwtUtil.verifyToken(dto.token);
 

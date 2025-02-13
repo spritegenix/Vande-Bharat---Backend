@@ -5,7 +5,9 @@ model Group {
     name        String
     description Json?
     privacy     GroupPrivacy @default(PUBLIC)
+    isVerified  Boolean      @default(false)
     isHidden    Boolean      @default(false)
+    isBlocked   Boolean      @default(false)
     banner      String?
     createdAt   DateTime     @default(now())
     updatedAt   DateTime     @updatedAt
@@ -65,6 +67,9 @@ model GroupHistory {
     name        String?
     description Json?
     privacy     String?
+    isVerified  Boolean?
+    isHidden    Boolean?
+    isBlocked   Boolean?
     banner      String?
     createdAt   DateTime?
     updatedAt   DateTime?

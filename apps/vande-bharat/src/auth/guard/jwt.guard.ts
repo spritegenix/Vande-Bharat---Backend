@@ -6,12 +6,15 @@ import {
   Inject,
 } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { firstValueFrom } from 'rxjs';
+import { catchError, firstValueFrom, throwError } from 'rxjs';
+import { ErrorUtil } from '../../utils';
+import { ValidateTokenResponseDto } from '@app/dtos';
 
 @Injectable()
 export class JwtGuard implements CanActivate {
   constructor(
     @Inject('AUTH_SERVICE') private readonly authClient: ClientProxy,
+    private readonly errorUtil: ErrorUtil,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -25,29 +28,36 @@ export class JwtGuard implements CanActivate {
     try {
       // Call Auth microservice to validate token
       const response = await firstValueFrom(
-        this.authClient.send({ cmd: 'auth_validate_token' }, { token }),
+        this.authClient
+          .send({ cmd: 'auth_validate_token' }, { token })
+          .pipe(
+            catchError((error) =>
+              throwError(() => this.errorUtil.handleError(error)),
+            ),
+          ),
       );
 
-      if (response.error) {
-        throw new UnauthorizedException(response.error);
+      // ✅ Validate response using Zod before attaching to request
+      const parsedResponse = ValidateTokenResponseDto.safeParse(response);
+      if (!parsedResponse.success) {
+        throw new UnauthorizedException(
+          'Invalid authentication response format',
+        );
       }
 
-      req.user = response; // Attach user to request
+      req.user = parsedResponse.data; // Attach validated user to request
       return true;
     } catch (error) {
-      console.log(error);
-      throw new UnauthorizedException('Invalid or expired token');
+      throw this.errorUtil.handleError(error);
     }
   }
 
   private getRequest(context: ExecutionContext): any {
-    return context.getArgByIndex(0); // ✅ Works for HTTP, RPC, WebSockets
+    return context.switchToHttp().getRequest(); // ✅ Works for HTTP requests
   }
 
   private extractToken(req: any): string | null {
-    if (req?.headers?.authorization?.startsWith('Bearer ')) {
-      return req.headers.authorization.split(' ')[1];
-    }
-    return null;
+    const authHeader = req?.headers?.authorization;
+    return authHeader?.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
   }
 }

@@ -1,70 +1,76 @@
-import {
-  ConflictException,
-  InternalServerErrorException,
-  Injectable,
-  BadRequestException,
-  UnauthorizedException,
-  ForbiddenException,
-  NotFoundException,
-  HttpException,
-} from '@nestjs/common';
+import * as Exception from '@nestjs/common/exceptions';
+import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import { Prisma } from '@prisma/client';
+import * as PrismaExceptions from '@prisma/client/extension';
+import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 @Injectable()
 export class ErrorUtil {
-  handleError(error: any) {
-    // Handle Prisma Unique Constraint Violation (Duplicate Entry)
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === 'P2002'
-    ) {
-      throw new ConflictException(
-        `Duplicate field error: ${error.meta?.target}`,
+  private static readonly httpExceptions: Record<number, any> = (() => {
+    return Object.keys(Exception)
+      .filter((key) => key.endsWith('Exception'))
+      .reduce(
+        (acc, key) => {
+          const exception = (Exception as any)[key];
+          if (exception && exception.prototype?.getStatus) {
+            acc[new exception().getStatus()] = exception;
+          }
+          return acc;
+        },
+        {} as Record<number, any>,
       );
+  })();
+
+  private static readonly prismaExceptions: Record<string, any> = (() => {
+    return Object.keys(PrismaExceptions)
+      .filter((key) => key.startsWith('P')) // Filter Prisma error codes
+      .reduce(
+        (acc, key) => {
+          acc[key] = PrismaExceptions[key];
+          return acc;
+        },
+        {} as Record<string, any>,
+      );
+  })();
+
+  handleError(error: any) {
+    // Handle Prisma Errors using PrismaExceptions dynamically
+    if (error instanceof PrismaClientKnownRequestError) {
+      const exceptionData = ErrorUtil.prismaExceptions[error.code];
+      if (exceptionData) {
+        const ExceptionClass =
+          ErrorUtil.httpExceptions[exceptionData.status] ||
+          Exception.InternalServerErrorException;
+        throw new ExceptionClass(
+          `${exceptionData.message}: ${error.meta?.target || 'unknown'}`,
+        );
+      }
+    }
+
+    // If the error is already a NestJS HTTP Exception, rethrow it
+    if ('getStatus' in error && typeof error.getStatus === 'function') {
+      throw error;
     }
 
     // Handle NestJS Microservice Errors (TCP responses)
-    if (error.response) {
-      const { statusCode, message } = error.response;
-
-      // If the error is already a NestJS HTTP Exception, rethrow it
-      if ('getStatus' in error && typeof error.getStatus === 'function') {
-        throw error;
-      }
-      switch (statusCode) {
-        case 400:
-          throw new BadRequestException(message);
-        case 401:
-          throw new UnauthorizedException(message);
-        case 403:
-          throw new ForbiddenException(message);
-        case 404:
-          throw new NotFoundException(message);
-        case 409:
-          throw new ConflictException(message);
-        default:
-          throw new InternalServerErrorException(
-            message || 'Unexpected error occurred',
-          );
-      }
-    }
-
     if (error?.response) {
       const { statusCode, message } = error.response;
-      return new HttpException(message, statusCode);
+      const ExceptionClass =
+        ErrorUtil.httpExceptions[statusCode] ||
+        Exception.InternalServerErrorException;
+      throw new ExceptionClass(message || 'Unexpected error occurred');
     }
 
     // Handle RPC Exception from Microservice
     if (error instanceof RpcException) {
       const errorResponse = error.getError();
-      throw new InternalServerErrorException(
+      throw new Exception.InternalServerErrorException(
         errorResponse || 'An unknown RPC error occurred',
       );
     }
 
     // Default Fallback
-    throw new InternalServerErrorException(
+    throw new Exception.InternalServerErrorException(
       'An unexpected server error occurred',
     );
   }

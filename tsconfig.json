@@ -24,11 +24,23 @@
       "@app/prisma/*": [
         "libs/prisma/src/*"
       ],
-      "@app/contracts": [
-        "libs/contracts/src"
+      "@app/dtos": [
+        "libs/dtos/src"
       ],
-      "@app/contracts/*": [
-        "libs/contracts/src/*"
+      "@app/dtos/*": [
+        "libs/dtos/src/*"
+      ],
+      "@app/pipes": [
+        "libs/pipes/src"
+      ],
+      "@app/pipes/*": [
+        "libs/pipes/src/*"
+      ],
+      "@app/interceptors": [
+        "libs/interceptors/src"
+      ],
+      "@app/interceptors/*": [
+        "libs/interceptors/src/*"
       ]
     }
   }

@@ -1,8 +1,12 @@
 import { Injectable, Inject } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { catchError, firstValueFrom, throwError } from 'rxjs';
-import { LoginDto, SignupDto, VerifyOtpDto } from '@app/contracts';
 import { ErrorUtil } from '../utils';
+import {
+  LoginRequestDto,
+  SignupRequestDto,
+  VerifyOtpRequestDto,
+} from '@app/dtos';
 
 @Injectable()
 export class AuthService {
@@ -12,7 +16,7 @@ export class AuthService {
     private readonly errorUtil: ErrorUtil,
   ) {}
 
-  async signup(dto: SignupDto) {
+  async signup(dto: SignupRequestDto) {
     try {
       return await firstValueFrom(
         this.authClient.send({ cmd: 'auth_signup' }, dto).pipe(
@@ -26,7 +30,7 @@ export class AuthService {
     }
   }
 
-  async verifyOtp(dto: VerifyOtpDto) {
+  async verifyOtp(dto: VerifyOtpRequestDto) {
     try {
       return await firstValueFrom(
         this.authClient.send({ cmd: 'auth_verify_otp' }, dto).pipe(
@@ -40,7 +44,7 @@ export class AuthService {
     }
   }
 
-  async login(dto: LoginDto) {
+  async login(dto: LoginRequestDto) {
     try {
       return await firstValueFrom(
         this.authClient.send({ cmd: 'auth_login' }, dto).pipe(
