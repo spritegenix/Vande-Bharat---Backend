@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
 import { PrismaService } from '@app/prisma';
 import { ErrorUtil } from '../utils';
-import { ValidateTokenResponseDto } from '@app/dtos';
+import { ValidateHeaderResponseDto } from '@app/dtos';
 
 @Injectable()
 export class UserService {
@@ -10,7 +10,7 @@ export class UserService {
     private readonly prisma: PrismaService,
     private readonly errorUtil: ErrorUtil,
   ) {}
-  async me(user: ValidateTokenResponseDto) {
+  async me(user: ValidateHeaderResponseDto) {
     try {
       const where: Prisma.UserWhereUniqueInput = { id: user.id };
       const include: Prisma.UserInclude = {

@@ -214,8 +214,6 @@ export class AuthService {
 
   async validateHeader(payload: ValidateHeaderPayloadDto) {
     try {
-      console.log('headers', payload.headers);
-
       let user: User = undefined;
 
       const tokenPayload = await this.verifyToken(payload.headers);
