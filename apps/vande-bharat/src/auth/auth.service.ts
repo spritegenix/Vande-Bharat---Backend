@@ -3,8 +3,13 @@ import { ClientProxy } from '@nestjs/microservices';
 import { catchError, firstValueFrom, throwError } from 'rxjs';
 import { ErrorUtil } from '../utils';
 import {
+  AddCredentialPayloadDto,
+  AddCredentialRequestDto,
   LoginRequestDto,
+  SignupPayloadDto,
   SignupRequestDto,
+  ValidateTokenPayloadDto,
+  ValidateTokenResponseDto,
   VerifyOtpRequestDto,
 } from '@app/dtos';
 
@@ -16,42 +21,70 @@ export class AuthService {
     private readonly errorUtil: ErrorUtil,
   ) {}
 
-  async signup(dto: SignupRequestDto) {
+  async signup(body: SignupRequestDto) {
     try {
       return await firstValueFrom(
-        this.authClient.send({ cmd: 'auth_signup' }, dto).pipe(
-          catchError((error) => {
-            return throwError(() => error); // Ensure error propagates to the catch block
-          }),
-        ),
+        this.authClient
+          .send({ cmd: 'auth_signup' }, body as SignupPayloadDto)
+          .pipe(
+            catchError((error) => {
+              return throwError(() => error); // Ensure error propagates to the catch block
+            }),
+          ),
       );
     } catch (error) {
       throw this.errorUtil.handleError(error);
     }
   }
 
-  async verifyOtp(dto: VerifyOtpRequestDto) {
+  async verifyOtp(body: VerifyOtpRequestDto) {
     try {
       return await firstValueFrom(
-        this.authClient.send({ cmd: 'auth_verify_otp' }, dto).pipe(
-          catchError((error) => {
-            return throwError(() => error); // Ensure error propagates to the catch block
-          }),
-        ),
+        this.authClient
+          .send({ cmd: 'auth_verify_otp' }, body as ValidateTokenPayloadDto)
+          .pipe(
+            catchError((error) => {
+              return throwError(() => error); // Ensure error propagates to the catch block
+            }),
+          ),
       );
     } catch (error) {
       throw this.errorUtil.handleError(error);
     }
   }
 
-  async login(dto: LoginRequestDto) {
+  async login(body: LoginRequestDto) {
     try {
       return await firstValueFrom(
-        this.authClient.send({ cmd: 'auth_login' }, dto).pipe(
-          catchError((error) => {
-            return throwError(() => error); // Ensure error propagates to the catch block
-          }),
-        ),
+        this.authClient
+          .send({ cmd: 'auth_login' }, body as ValidateTokenPayloadDto)
+          .pipe(
+            catchError((error) => {
+              return throwError(() => error); // Ensure error propagates to the catch block
+            }),
+          ),
+      );
+    } catch (error) {
+      throw this.errorUtil.handleError(error);
+    }
+  }
+
+  async addCredential(
+    body: AddCredentialRequestDto,
+    user: ValidateTokenResponseDto,
+  ) {
+    try {
+      return await firstValueFrom(
+        this.authClient
+          .send({ cmd: 'auth_add_credential' }, {
+            ...body,
+            ...user,
+          } as AddCredentialPayloadDto)
+          .pipe(
+            catchError((error) => {
+              return throwError(() => error); // Ensure error propagates to the catch block
+            }),
+          ),
       );
     } catch (error) {
       throw this.errorUtil.handleError(error);

@@ -33,6 +33,8 @@ export const Group = z
     updatedAt: z.date().nullable().optional(),
     deletedAt: z.date().nullable().optional(),
 
+    membersCount: z.number().nullable().optional(),
+
     owner: z
       .lazy(() => User.nullable().optional())
       .nullable()
@@ -124,6 +126,8 @@ export const GroupHistory = z
     createdAt: z.date().nullable().optional(),
     updatedAt: z.date().nullable().optional(),
     deletedAt: z.date().nullable().optional(),
+
+    membersCount: z.number().nullable().optional(),
 
     ownerId: z.string().nullable().optional(),
     categoryId: z.string().nullable().optional(),

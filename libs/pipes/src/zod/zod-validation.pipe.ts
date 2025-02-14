@@ -1,29 +1,60 @@
-import { BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
+import {
+  ArgumentMetadata,
+  BadRequestException,
+  Injectable,
+  PipeTransform,
+} from '@nestjs/common';
 import { ZodSchema, ZodError } from 'zod';
 
 @Injectable()
-export class ZodValidationPipe<T> implements PipeTransform {
+export class ZodValidationPipe<T> implements PipeTransform<unknown, T> {
   constructor(
     private schema: ZodSchema<T>,
-    // Optional debugging flag
+    private debug: boolean = false,
   ) {}
 
-  transform(value: unknown): T {
-    // Perform validation
-    const result = this.schema.safeParse(value);
-
-    if (!result.success) {
-      // Extract meaningful error messages
-      const formattedErrors = this.formatErrors(result.error);
-
-      // Throw a NestJS-friendly validation exception
-      throw new BadRequestException({
-        message: 'Validation failed',
-        errors: formattedErrors,
-      });
+  transform(value: unknown, metadata: ArgumentMetadata): T {
+    // console.log('Validating value:', value);
+    // console.log('Metadata:', metadata);
+    if (this.debug) {
+      console.log('Validating value:', value);
+      console.log('Metadata:', metadata);
     }
 
-    return result.data;
+    // Return early if value is undefined or null and we're not validating body
+    if ((value === undefined || value === null) && metadata.type !== 'body') {
+      return value as T;
+    }
+
+    // Only validate if we're transforming the request body
+    if (metadata.type === 'body') {
+      try {
+        const result = this.schema.safeParse(value);
+
+        if (!result.success) {
+          if (this.debug) {
+            console.error(
+              'Validation Error:',
+              JSON.stringify(this.formatErrors(result.error), null, 2),
+            );
+          }
+          throw new BadRequestException({
+            message: 'Validation failed',
+            errors: this.formatErrors(result.error),
+          });
+        }
+
+        return result.data;
+      } catch (error) {
+        if (error instanceof BadRequestException) {
+          throw error;
+        }
+        throw new BadRequestException('Request validation failed');
+      }
+    }
+
+    // For non-body data, just pass it through
+    return value as T;
   }
 
   private formatErrors(error: ZodError): Record<string, string[]> {

@@ -8,7 +8,7 @@ import {
 import { ClientProxy } from '@nestjs/microservices';
 import { catchError, firstValueFrom, throwError } from 'rxjs';
 import { ErrorUtil } from '../../utils';
-import { ValidateTokenResponseDto } from '@app/dtos';
+import { ValidateTokenPayloadDto, ValidateTokenResponseDto } from '@app/dtos';
 
 @Injectable()
 export class JwtGuard implements CanActivate {
@@ -29,7 +29,9 @@ export class JwtGuard implements CanActivate {
       // Call Auth microservice to validate token
       const response = await firstValueFrom(
         this.authClient
-          .send({ cmd: 'auth_validate_token' }, { token })
+          .send({ cmd: 'auth_validate_token' }, {
+            token,
+          } as ValidateTokenPayloadDto)
           .pipe(
             catchError((error) =>
               throwError(() => this.errorUtil.handleError(error)),

@@ -10,22 +10,25 @@ model User {
     updatedAt DateTime  @updatedAt
     deletedAt DateTime?
 
+    followingPagesCount Int? @default(0)
+    joinedGroupsCount   Int? @default(0)
+
     // Relations
-    ipAddresses   IpAddress[]
-    credentials   Credential[] // Renamed from userCredentials for consistency
-    comments      Comment[]
-    reactions     Reaction[]
-    ownedGroups   Group[]        @relation("GroupOwner")
-    groupMembers  GroupMember[]
-    ownedPages    Page[]         @relation("PageOwner")
-    pageFollowers PageFollower[]
-    orders        Order[]
-    cartItems     CartItem[] // Renamed from cart for consistency
-    donations     Donation[] // Added missing relation
-    bookmarks     Bookmark[]
-    reports       Report[]
-    notifications Notification[]
-    userHistory   UserHistory[]
+    ipAddresses    IpAddress[]
+    credentials    Credential[] // Renamed from userCredentials for consistency
+    comments       Comment[]
+    reactions      Reaction[]
+    ownedGroups    Group[]        @relation("GroupOwner")
+    joinedGroups   GroupMember[]
+    ownedPages     Page[]         @relation("PageOwner")
+    followingPages PageFollower[]
+    orders         Order[]
+    cartItems      CartItem[] // Renamed from cart for consistency
+    donations      Donation[] // Added missing relation
+    bookmarks      Bookmark[]
+    reports        Report[]
+    notifications  Notification[]
+    userHistory    UserHistory[]
 
     @@map("users")
 }
@@ -83,6 +86,9 @@ model UserHistory {
     isVerified Boolean  @default(false)
     isHidden   Boolean?
     isBlocked  Boolean?
+
+    followingPagesCount Int?
+    joinedGroupsCount   Int?
 
     createdAt DateTime?
     updatedAt DateTime?

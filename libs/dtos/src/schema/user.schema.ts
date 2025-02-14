@@ -24,6 +24,9 @@ export const User = z
     updatedAt: z.date().nullable().optional(),
     deletedAt: z.date().nullable().optional(),
 
+    followingPagesCount: z.number().nullable().optional(),
+    joinedGroupsCount: z.number().nullable().optional(),
+
     ipAddresses: z
       .lazy(() => IpAddress.array().nullable().optional())
       .nullable()
@@ -44,7 +47,7 @@ export const User = z
       .lazy(() => Group.array().nullable().optional())
       .nullable()
       .optional(),
-    groupMembers: z
+    joinedGroups: z
       .lazy(() => GroupMember.array().nullable().optional())
       .nullable()
       .optional(),
@@ -52,7 +55,7 @@ export const User = z
       .lazy(() => Page.array().nullable().optional())
       .nullable()
       .optional(),
-    pageFollowers: z
+    followingPages: z
       .lazy(() => PageFollower.array().nullable().optional())
       .nullable()
       .optional(),
@@ -162,6 +165,9 @@ export const UserHistory = z
     isVerified: z.boolean().nullable().optional(),
     isHidden: z.boolean().nullable().optional(),
     isBlocked: z.boolean().nullable().optional(),
+
+    followingPagesCount: z.number().nullable().optional(),
+    joinedGroupsCount: z.number().nullable().optional(),
 
     createdAt: z.date().nullable().optional(),
     updatedAt: z.date().nullable().optional(),

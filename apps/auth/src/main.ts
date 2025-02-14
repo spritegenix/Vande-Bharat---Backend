@@ -14,6 +14,8 @@ async function bootstrap() {
     },
   );
 
+  app.enableShutdownHooks();
+
   await app.listen();
   console.log(
     `🚀 Auth Microservice running on ${process.env.AUTH_HOST || '127.0.0.1'}:${process.env.AUTH_PORT || 4000}`,

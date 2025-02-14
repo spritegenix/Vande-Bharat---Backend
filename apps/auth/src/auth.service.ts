@@ -15,10 +15,11 @@ import {
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@app/prisma';
 import {
-  LoginRequestDto,
-  SignupRequestDto,
-  ValidateTokenRequestDto,
-  VerifyOtpRequestDto,
+  AddCredentialPayloadDto,
+  LoginPayloadDto,
+  SignupPayloadDto,
+  ValidateTokenPayloadDto,
+  VerifyOtpPayloadDto,
 } from '@app/dtos';
 
 @Injectable()
@@ -33,11 +34,11 @@ export class AuthService {
     private slugUtil: SlugUtil,
   ) {}
 
-  async signup(dto: SignupRequestDto) {
+  async signup(payload: SignupPayloadDto) {
     try {
       return await this.prisma.$transaction(async (tx) => {
         const contactConditions: Prisma.CredentialWhereInput = {
-          value: dto.email || dto.phone,
+          value: payload.email || payload.phone,
           isVerified: true,
           verifiedAt: { not: null },
           deletedAt: null,
@@ -53,43 +54,43 @@ export class AuthService {
 
         await this.credentialUtil.cleanupUnverifiedCredentials(
           tx,
-          dto.email,
+          payload.email,
           'EMAIL',
         );
         await this.credentialUtil.cleanupUnverifiedCredentials(
           tx,
-          dto.phone,
+          payload.phone,
           'PHONE',
         );
 
-        const hash = await this.passwordUtil.hashPassword(dto.password);
+        const hash = await this.passwordUtil.hashPassword(payload.password);
 
         const user = await tx.user.create({
           data: {
             hash,
-            ownedPages: { create: { name: dto.name, isDefault: true } },
+            ownedPages: { create: { name: payload.name, isDefault: true } },
           },
         });
 
-        if (dto.email) {
+        if (payload.email) {
           await this.credentialUtil.createCredential(
             tx,
             user.id,
-            dto.email,
+            payload.email,
             'EMAIL',
           );
         }
-        if (dto.phone) {
+        if (payload.phone) {
           await this.credentialUtil.createCredential(
             tx,
             user.id,
-            dto.phone,
+            payload.phone,
             'PHONE',
           );
         }
 
         return {
-          message: `Verification code sent to ${dto.email || dto.phone}`,
+          message: `Verification code sent to ${payload.email || payload.phone}`,
         };
       });
     } catch (error) {
@@ -97,11 +98,11 @@ export class AuthService {
     }
   }
 
-  async verifyOtp(dto: VerifyOtpRequestDto) {
+  async verifyOtp(payload: VerifyOtpPayloadDto) {
     try {
       const credential = await this.otpUtil.verifyOtp(
-        dto.email || dto.phone,
-        dto.otp,
+        payload.email || payload.phone,
+        payload.otp,
       );
 
       if (credential === null) {
@@ -161,9 +162,9 @@ export class AuthService {
     }
   }
 
-  async login(dto: LoginRequestDto) {
+  async login(payload: LoginPayloadDto) {
     try {
-      const value = dto.email || dto.phone;
+      const value = payload.email || payload.phone;
       const existingUser = await this.prisma.user.findFirst({
         where: {
           credentials: {
@@ -191,7 +192,7 @@ export class AuthService {
       if (
         !existingUser ||
         !(await this.passwordUtil.verifyPassword(
-          dto.password,
+          payload.password,
           existingUser.hash,
         ))
       ) {
@@ -211,22 +212,77 @@ export class AuthService {
     }
   }
 
-  async validateToken(dto: ValidateTokenRequestDto) {
+  async validateToken(payload: ValidateTokenPayloadDto) {
     try {
-      const payload = await this.jwtUtil.verifyToken(dto.token);
+      const tokenPayload = await this.jwtUtil.verifyToken(payload.token);
 
-      if (!payload || !payload.sub) {
+      if (!tokenPayload || !tokenPayload.sub) {
         throw new UnauthorizedException('Invalid token');
       }
 
       const user = await this.prisma.user.findUnique({
-        where: { id: payload.sub as string },
+        where: { id: tokenPayload.sub as string },
       });
       if (!user) {
         throw new UnauthorizedException('User not found');
       }
 
       return user; // Return user data if valid
+    } catch (error) {
+      this.errorUtil.handleError(error);
+    }
+  }
+
+  async addCredential(payload: AddCredentialPayloadDto) {
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        const contactConditions: Prisma.CredentialWhereInput = {
+          value: payload.email || payload.phone,
+          isVerified: true,
+          verifiedAt: { not: null },
+          deletedAt: null,
+        };
+
+        const existingUser = await tx.credential.findFirst({
+          where: contactConditions,
+        });
+
+        if (existingUser) {
+          throw new ConflictException('Credentials already in use');
+        }
+
+        await this.credentialUtil.cleanupUnverifiedCredentials(
+          tx,
+          payload.email,
+          'EMAIL',
+        );
+        await this.credentialUtil.cleanupUnverifiedCredentials(
+          tx,
+          payload.phone,
+          'PHONE',
+        );
+
+        if (payload.email) {
+          await this.credentialUtil.createCredential(
+            tx,
+            payload.id,
+            payload.email,
+            'EMAIL',
+          );
+        }
+        if (payload.phone) {
+          await this.credentialUtil.createCredential(
+            tx,
+            payload.id,
+            payload.phone,
+            'PHONE',
+          );
+        }
+
+        return {
+          message: `Verification code sent to ${payload.email || payload.phone}`,
+        };
+      });
     } catch (error) {
       this.errorUtil.handleError(error);
     }

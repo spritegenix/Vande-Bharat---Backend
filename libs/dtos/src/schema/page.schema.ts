@@ -34,6 +34,9 @@ export const Page = z
     updatedAt: z.date().nullable().optional(),
     deletedAt: z.date().nullable().optional(),
 
+    followerCount: z.number().nullable().optional(),
+    postCount: z.number().nullable().optional(),
+
     ownerId: z.string().nullable().optional(),
     owner: z
       .lazy(() => User.nullable().optional())
@@ -133,6 +136,9 @@ export const PageHistory = z
     createdAt: z.date().nullable().optional(),
     updatedAt: z.date().nullable().optional(),
     deletedAt: z.date().nullable().optional(),
+
+    followerCount: z.number().nullable().optional(),
+    postCount: z.number().nullable().optional(),
 
     ownerId: z.string().nullable().optional(),
     page: z

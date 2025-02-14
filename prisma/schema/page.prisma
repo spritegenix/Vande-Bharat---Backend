@@ -15,6 +15,9 @@ model Page {
     updatedAt          DateTime  @updatedAt
     deletedAt          DateTime?
 
+    followerCount Int? @default(0)
+    postCount     Int? @default(0)
+
     ownerId String
     owner   User   @relation("PageOwner", fields: [ownerId], references: [id])
 
@@ -74,6 +77,9 @@ model PageHistory {
     createdAt          DateTime?
     updatedAt          DateTime?
     deletedAt          DateTime?
+
+    followerCount Int?
+    postCount     Int?
 
     ownerId String?
 
