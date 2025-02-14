@@ -8,8 +8,8 @@ import {
   LoginResponseDto,
   SignupPayloadDto,
   SignupResponseDto,
-  ValidateTokenPayloadDto,
-  ValidateTokenResponseDto,
+  ValidateHeaderPayloadDto,
+  ValidateHeaderResponseDto,
   VerifyOtpPayloadDto,
   VerifyOtpResponseDto,
 } from '@app/dtos';
@@ -41,11 +41,11 @@ export class AuthController {
     return await this.authService.login(payload);
   }
 
-  @MessagePattern({ cmd: 'auth_validate_token' })
-  @UsePipes(new ZodValidationPipe(ValidateTokenPayloadDto))
-  @UseInterceptors(new ZodResponseInterceptor(ValidateTokenResponseDto, true))
-  async validateToken(@Payload() payload: ValidateTokenPayloadDto) {
-    return await this.authService.validateToken(payload);
+  @MessagePattern({ cmd: 'auth_validate_header' })
+  @UsePipes(new ZodValidationPipe(ValidateHeaderPayloadDto))
+  @UseInterceptors(new ZodResponseInterceptor(ValidateHeaderResponseDto, true))
+  async validateHeader(@Payload() payload: ValidateHeaderPayloadDto) {
+    return await this.authService.validateHeader(payload);
   }
 
   @MessagePattern({ cmd: 'auth_add_credential' })

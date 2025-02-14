@@ -8,8 +8,8 @@ import {
   LoginRequestDto,
   SignupPayloadDto,
   SignupRequestDto,
-  ValidateTokenPayloadDto,
-  ValidateTokenResponseDto,
+  ValidateHeaderPayloadDto,
+  ValidateHeaderResponseDto,
   VerifyOtpRequestDto,
 } from '@app/dtos';
 
@@ -41,7 +41,7 @@ export class AuthService {
     try {
       return await firstValueFrom(
         this.authClient
-          .send({ cmd: 'auth_verify_otp' }, body as ValidateTokenPayloadDto)
+          .send({ cmd: 'auth_verify_otp' }, body as ValidateHeaderPayloadDto)
           .pipe(
             catchError((error) => {
               return throwError(() => error); // Ensure error propagates to the catch block
@@ -57,7 +57,7 @@ export class AuthService {
     try {
       return await firstValueFrom(
         this.authClient
-          .send({ cmd: 'auth_login' }, body as ValidateTokenPayloadDto)
+          .send({ cmd: 'auth_login' }, body as ValidateHeaderPayloadDto)
           .pipe(
             catchError((error) => {
               return throwError(() => error); // Ensure error propagates to the catch block
@@ -71,7 +71,7 @@ export class AuthService {
 
   async addCredential(
     body: AddCredentialRequestDto,
-    user: ValidateTokenResponseDto,
+    user: ValidateHeaderResponseDto,
   ) {
     try {
       return await firstValueFrom(

@@ -15,7 +15,7 @@ import {
   LoginResponseDto,
   SignupRequestDto,
   SignupResponseDto,
-  ValidateTokenResponseDto,
+  ValidateHeaderResponseDto,
   VerifyOtpRequestDto,
   VerifyOtpResponseDto,
 } from '@app/dtos';
@@ -55,7 +55,7 @@ export class AuthController {
   @UseInterceptors(new ZodResponseInterceptor(AddCredentialResponseDto, true))
   async addCredential(
     @Body() body: AddCredentialRequestDto, // This should only contain phone
-    @GetUser() user: ValidateTokenResponseDto, // This gets the JWT data from req.user
+    @GetUser() user: ValidateHeaderResponseDto, // This gets the JWT data from req.user
   ) {
     console.log('DTO received:', body); // Should only show phone
     console.log('Authenticated user:', user); // Should show the JWT data

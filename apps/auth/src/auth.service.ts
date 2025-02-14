@@ -12,13 +12,13 @@ import {
   PasswordUtil,
   SlugUtil,
 } from './utils';
-import { Prisma } from '@prisma/client';
+import { Prisma, User } from '@prisma/client';
 import { PrismaService } from '@app/prisma';
 import {
   AddCredentialPayloadDto,
   LoginPayloadDto,
   SignupPayloadDto,
-  ValidateTokenPayloadDto,
+  ValidateHeaderPayloadDto,
   VerifyOtpPayloadDto,
 } from '@app/dtos';
 
@@ -212,15 +212,19 @@ export class AuthService {
     }
   }
 
-  async validateToken(payload: ValidateTokenPayloadDto) {
+  async validateHeader(payload: ValidateHeaderPayloadDto) {
     try {
-      const tokenPayload = await this.jwtUtil.verifyToken(payload.token);
+      console.log('headers', payload.headers);
 
-      if (!tokenPayload || !tokenPayload.sub) {
-        throw new UnauthorizedException('Invalid token');
+      let user: User = undefined;
+
+      const tokenPayload = await this.verifyToken(payload.headers);
+
+      if (!tokenPayload) {
+        throw new UnauthorizedException('User not found');
       }
 
-      const user = await this.prisma.user.findUnique({
+      user = await this.prisma.user.findUnique({
         where: { id: tokenPayload.sub as string },
       });
       if (!user) {
@@ -231,6 +235,16 @@ export class AuthService {
     } catch (error) {
       this.errorUtil.handleError(error);
     }
+  }
+
+  private async verifyToken(headers: any) {
+    const authHeader = headers?.authorization;
+
+    const token = authHeader?.startsWith('Bearer ')
+      ? authHeader.split(' ')[1]
+      : null;
+
+    return await this.jwtUtil.verifyToken(token);
   }
 
   async addCredential(payload: AddCredentialPayloadDto) {

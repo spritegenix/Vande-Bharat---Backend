@@ -8,7 +8,7 @@ import {
 import { ClientProxy } from '@nestjs/microservices';
 import { catchError, firstValueFrom, throwError } from 'rxjs';
 import { ErrorUtil } from '../../utils';
-import { ValidateTokenPayloadDto, ValidateTokenResponseDto } from '@app/dtos';
+import { ValidateHeaderPayloadDto, ValidateHeaderResponseDto } from '@app/dtos';
 
 @Injectable()
 export class JwtGuard implements CanActivate {
@@ -19,19 +19,16 @@ export class JwtGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = this.getRequest(context);
-    const token = this.extractToken(req);
 
-    if (!token) {
-      throw new UnauthorizedException('Authentication token is missing');
-    }
+    const headers = req.headers;
 
     try {
       // Call Auth microservice to validate token
       const response = await firstValueFrom(
         this.authClient
-          .send({ cmd: 'auth_validate_token' }, {
-            token,
-          } as ValidateTokenPayloadDto)
+          .send({ cmd: 'auth_validate_header' }, {
+            headers,
+          } as ValidateHeaderPayloadDto)
           .pipe(
             catchError((error) =>
               throwError(() => this.errorUtil.handleError(error)),
@@ -40,7 +37,7 @@ export class JwtGuard implements CanActivate {
       );
 
       // ✅ Validate response using Zod before attaching to request
-      const parsedResponse = ValidateTokenResponseDto.safeParse(response);
+      const parsedResponse = ValidateHeaderResponseDto.safeParse(response);
       if (!parsedResponse.success) {
         throw new UnauthorizedException(
           'Invalid authentication response format',
