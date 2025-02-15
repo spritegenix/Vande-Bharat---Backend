@@ -35,33 +35,28 @@ export const Donation = z
   })
   .omit({
     donationHistory: true,
-  })
-  .nullable()
-  .optional();
+  });
 
 // Donation History Schema
-export const DonationHistory = z
-  .object({
-    id: z.string().nullable().optional(),
-    donationId: z.string().nullable().optional(),
-    amount: z.number().nullable().optional(), // Handling Decimal as a number
-    description: z.any().nullable().optional(), // JSON field
-    status: DonationStatus.nullable().optional(),
+export const DonationHistory = z.object({
+  id: z.string().nullable().optional(),
+  donationId: z.string().nullable().optional(),
+  amount: z.number().nullable().optional(), // Handling Decimal as a number
+  description: z.any().nullable().optional(), // JSON field
+  status: DonationStatus.nullable().optional(),
 
-    createdAt: z.date().nullable().optional(),
-    updatedAt: z.date().nullable().optional(),
-    deletedAt: z.date().nullable().optional(),
+  createdAt: z.date().nullable().optional(),
+  updatedAt: z.date().nullable().optional(),
+  deletedAt: z.date().nullable().optional(),
 
-    userId: z.string().nullable().optional(),
-    pageId: z.string().nullable().optional(),
+  userId: z.string().nullable().optional(),
+  pageId: z.string().nullable().optional(),
 
-    donation: z
-      .lazy(() => Donation.nullable().optional())
-      .nullable()
-      .optional(),
-  })
-  .nullable()
-  .optional();
+  donation: z
+    .lazy(() => Donation.nullable().optional())
+    .nullable()
+    .optional(),
+});
 
 // Define types based on schemas
 export type Donation = z.infer<typeof Donation>;

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Prisma, User } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '@app/prisma';
 import { ErrorUtil } from '../utils';
 import { ValidateHeaderResponseDto } from '@app/dtos';
@@ -41,7 +41,7 @@ export class UserService {
     }
   }
 
-  async getAllCredentials(user: User) {
+  async getAllCredentials(user: ValidateHeaderResponseDto) {
     try {
       const where: Prisma.CredentialWhereInput = {
         userId: user.id,

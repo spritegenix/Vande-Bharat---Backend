@@ -91,9 +91,7 @@ export const User = z
   .omit({
     hash: true,
     userHistory: true,
-  })
-  .nullable()
-  .optional();
+  });
 
 // IP Address Schema
 export const IpAddress = z
@@ -119,9 +117,7 @@ export const IpAddress = z
   })
   .omit({
     ipAddressHistory: true,
-  })
-  .nullable()
-  .optional();
+  });
 
 // Credential Schema
 export const Credential = z
@@ -152,85 +148,74 @@ export const Credential = z
   })
   .omit({
     credentialHistory: true,
-  })
-  .nullable()
-  .optional();
+  });
 
 // User History Schema
-export const UserHistory = z
-  .object({
-    id: z.string().nullable().optional(),
-    userId: z.string().nullable().optional(),
-    hash: z.string().nullable().optional(),
-    isVerified: z.boolean().nullable().optional(),
-    isHidden: z.boolean().nullable().optional(),
-    isBlocked: z.boolean().nullable().optional(),
+export const UserHistory = z.object({
+  id: z.string().nullable().optional(),
+  userId: z.string().nullable().optional(),
+  hash: z.string().nullable().optional(),
+  isVerified: z.boolean().nullable().optional(),
+  isHidden: z.boolean().nullable().optional(),
+  isBlocked: z.boolean().nullable().optional(),
 
-    followingPagesCount: z.number().nullable().optional(),
-    joinedGroupsCount: z.number().nullable().optional(),
+  followingPagesCount: z.number().nullable().optional(),
+  joinedGroupsCount: z.number().nullable().optional(),
 
-    createdAt: z.date().nullable().optional(),
-    updatedAt: z.date().nullable().optional(),
-    deletedAt: z.date().nullable().optional(),
+  createdAt: z.date().nullable().optional(),
+  updatedAt: z.date().nullable().optional(),
+  deletedAt: z.date().nullable().optional(),
 
-    user: z
-      .lazy(() => User.nullable().optional())
-      .nullable()
-      .optional(),
-  })
-  .nullable()
-  .optional();
+  user: z
+    .lazy(() => User.nullable().optional())
+    .nullable()
+    .optional(),
+});
 
 // IP Address History Schema
-export const IpAddressHistory = z
-  .object({
-    id: z.string().nullable().optional(),
-    ipAddressId: z.string().nullable().optional(),
-    ipV4: z.string().nullable().optional(),
-    ipV6: z.string().nullable().optional(),
-    timestamp: z.date().nullable().optional(),
+export const IpAddressHistory = z.object({
+  id: z.string().nullable().optional(),
+  ipAddressId: z.string().nullable().optional(),
+  ipV4: z.string().nullable().optional(),
+  ipV6: z.string().nullable().optional(),
+  timestamp: z.date().nullable().optional(),
 
-    createdAt: z.date().nullable().optional(),
-    updatedAt: z.date().nullable().optional(),
-    deletedAt: z.date().nullable().optional(),
+  createdAt: z.date().nullable().optional(),
+  updatedAt: z.date().nullable().optional(),
+  deletedAt: z.date().nullable().optional(),
 
-    userId: z.string().nullable().optional(),
+  userId: z.string().nullable().optional(),
 
-    ipAddress: z
-      .lazy(() => IpAddress.nullable().optional())
-      .nullable()
-      .optional(),
-  })
-  .nullable()
-  .optional();
+  ipAddress: z
+    .lazy(() => IpAddress.nullable().optional())
+    .nullable()
+    .optional(),
+});
 
 // Credential History Schema
-export const CredentialHistory = z
-  .object({
-    id: z.string().nullable().optional(),
-    credentialId: z.string().nullable().optional(),
-    type: CredentialType.nullable().optional(),
-    value: z.string().nullable().optional(),
-    isVerified: z.boolean().nullable().optional(),
-    isPrimary: z.boolean().nullable().optional(),
-    verifiedAt: z.date().nullable().optional(),
-    order: z.number().nullable().optional(),
-    otp: z.string().nullable().optional(),
-    otpExpiresAt: z.date().nullable().optional(),
+export const CredentialHistory = z.object({
+  id: z.string().nullable().optional(),
+  credentialId: z.string().nullable().optional(),
+  type: CredentialType.nullable().optional(),
+  value: z.string().nullable().optional(),
+  isVerified: z.boolean().nullable().optional(),
+  isPrimary: z.boolean().nullable().optional(),
+  verifiedAt: z.date().nullable().optional(),
+  order: z.number().nullable().optional(),
+  otp: z.string().nullable().optional(),
+  otpExpiresAt: z.date().nullable().optional(),
 
-    createdAt: z.date().nullable().optional(),
-    updatedAt: z.date().nullable().optional(),
-    deletedAt: z.date().nullable().optional(),
+  createdAt: z.date().nullable().optional(),
+  updatedAt: z.date().nullable().optional(),
+  deletedAt: z.date().nullable().optional(),
 
-    userId: z.string().nullable().optional(),
+  userId: z.string().nullable().optional(),
 
-    credential: z
-      .lazy(() => Credential.nullable().optional())
-      .nullable()
-      .optional(),
-  })
-  .nullable()
-  .optional();
+  credential: z
+    .lazy(() => Credential.nullable().optional())
+    .nullable()
+    .optional(),
+});
 
 // Define types based on schemas
 export type User = z.infer<typeof User>;

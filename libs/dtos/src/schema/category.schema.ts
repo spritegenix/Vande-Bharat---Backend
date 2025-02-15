@@ -79,57 +79,49 @@ export const ProductCategory = z
   })
   .omit({
     productCategoryHistory: true,
-  })
-  .nullable()
-  .optional();
+  });
 
 // Category History Schema
-export const CategoryHistory = z
-  .object({
-    id: z.string().nullable().optional(),
-    categoryId: z.string().nullable().optional(),
-    slug: z.string().nullable().optional(),
-    name: z.string().nullable().optional(),
-    icon: z.string().nullable().optional(),
-    description: z.string().nullable().optional(),
+export const CategoryHistory = z.object({
+  id: z.string().nullable().optional(),
+  categoryId: z.string().nullable().optional(),
+  slug: z.string().nullable().optional(),
+  name: z.string().nullable().optional(),
+  icon: z.string().nullable().optional(),
+  description: z.string().nullable().optional(),
 
-    createdAt: z.date().nullable().optional(),
-    updatedAt: z.date().nullable().optional(),
-    deletedAt: z.date().nullable().optional(),
+  createdAt: z.date().nullable().optional(),
+  updatedAt: z.date().nullable().optional(),
+  deletedAt: z.date().nullable().optional(),
 
-    parentId: z.string().nullable().optional(),
+  parentId: z.string().nullable().optional(),
 
-    category: z
-      .lazy(() => Category.nullable().optional())
-      .nullable()
-      .optional(),
-  })
-  .nullable()
-  .optional();
+  category: z
+    .lazy(() => Category.nullable().optional())
+    .nullable()
+    .optional(),
+});
 
 // Product Category History Schema
-export const ProductCategoryHistory = z
-  .object({
-    id: z.string().nullable().optional(),
-    productCategoryId: z.string().nullable().optional(),
-    slug: z.string().nullable().optional(),
-    name: z.string().nullable().optional(),
-    icon: z.string().nullable().optional(),
-    description: z.string().nullable().optional(),
+export const ProductCategoryHistory = z.object({
+  id: z.string().nullable().optional(),
+  productCategoryId: z.string().nullable().optional(),
+  slug: z.string().nullable().optional(),
+  name: z.string().nullable().optional(),
+  icon: z.string().nullable().optional(),
+  description: z.string().nullable().optional(),
 
-    createdAt: z.date().nullable().optional(),
-    updatedAt: z.date().nullable().optional(),
-    deletedAt: z.date().nullable().optional(),
+  createdAt: z.date().nullable().optional(),
+  updatedAt: z.date().nullable().optional(),
+  deletedAt: z.date().nullable().optional(),
 
-    parentId: z.string().nullable().optional(),
+  parentId: z.string().nullable().optional(),
 
-    productCategory: z
-      .lazy(() => ProductCategory.nullable().optional())
-      .nullable()
-      .optional(),
-  })
-  .nullable()
-  .optional();
+  productCategory: z
+    .lazy(() => ProductCategory.nullable().optional())
+    .nullable()
+    .optional(),
+});
 
 // Define types based on schemas
 export type Category = z.infer<typeof Category>;

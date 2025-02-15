@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 // ✅ Signup Request Schema (Zod)
-export const SignupRequestDto = z
+export const SignupRequestBodyDto = z
   .object({
     email: z.string().email().optional(),
     phone: z
@@ -17,7 +17,7 @@ export const SignupRequestDto = z
   });
 
 // ✅ TypeScript Type Inference
-export type SignupRequestDto = z.infer<typeof SignupRequestDto>;
+export type SignupRequestBodyDto = z.infer<typeof SignupRequestBodyDto>;
 
 export const SignupPayloadDto = z
   .object({

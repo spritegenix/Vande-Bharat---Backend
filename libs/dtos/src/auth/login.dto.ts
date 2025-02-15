@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const LoginRequestDto = z
+export const LoginRequestBodyDto = z
   .object({
     email: z.string().email().optional(),
     phone: z
@@ -14,7 +14,7 @@ export const LoginRequestDto = z
     path: ['email', 'phone'],
   });
 
-export type LoginRequestDto = z.infer<typeof LoginRequestDto>;
+export type LoginRequestBodyDto = z.infer<typeof LoginRequestBodyDto>;
 
 export const LoginPayloadDto = z
   .object({
@@ -36,6 +36,5 @@ export type LoginPayloadDto = z.infer<typeof LoginPayloadDto>;
 export const LoginResponseDto = z.object({
   token: z.string(),
 });
-
 // ✅ TypeScript Type Inference for Response DTO
 export type LoginResponseDto = z.infer<typeof LoginResponseDto>;

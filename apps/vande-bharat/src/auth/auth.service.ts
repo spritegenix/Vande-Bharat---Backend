@@ -4,13 +4,13 @@ import { catchError, firstValueFrom, throwError } from 'rxjs';
 import { ErrorUtil } from '../utils';
 import {
   AddCredentialPayloadDto,
-  AddCredentialRequestDto,
-  LoginRequestDto,
+  AddCredentialRequestBodyDto,
+  LoginRequestBodyDto,
   SignupPayloadDto,
-  SignupRequestDto,
+  SignupRequestBodyDto,
   ValidateHeaderPayloadDto,
   ValidateHeaderResponseDto,
-  VerifyOtpRequestDto,
+  VerifyOtpRequestBodyDto,
 } from '@app/dtos';
 
 @Injectable()
@@ -21,7 +21,7 @@ export class AuthService {
     private readonly errorUtil: ErrorUtil,
   ) {}
 
-  async signup(body: SignupRequestDto) {
+  async signup(body: SignupRequestBodyDto) {
     try {
       return await firstValueFrom(
         this.authClient
@@ -37,7 +37,7 @@ export class AuthService {
     }
   }
 
-  async verifyOtp(body: VerifyOtpRequestDto) {
+  async verifyOtp(body: VerifyOtpRequestBodyDto) {
     try {
       return await firstValueFrom(
         this.authClient
@@ -53,7 +53,7 @@ export class AuthService {
     }
   }
 
-  async login(body: LoginRequestDto) {
+  async login(body: LoginRequestBodyDto) {
     try {
       return await firstValueFrom(
         this.authClient
@@ -70,7 +70,7 @@ export class AuthService {
   }
 
   async addCredential(
-    body: AddCredentialRequestDto,
+    body: AddCredentialRequestBodyDto,
     user: ValidateHeaderResponseDto,
   ) {
     try {

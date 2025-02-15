@@ -57,9 +57,7 @@ export const Product = z
   })
   .omit({
     productHistory: true,
-  })
-  .nullable()
-  .optional();
+  });
 
 // Cart Item Schema
 export const CartItem = z
@@ -88,9 +86,7 @@ export const CartItem = z
   })
   .omit({
     cartItemHistory: true,
-  })
-  .nullable()
-  .optional();
+  });
 
 // Order Schema
 export const Order = z
@@ -120,9 +116,7 @@ export const Order = z
   })
   .omit({
     orderHistory: true,
-  })
-  .nullable()
-  .optional();
+  });
 
 // Order Item Schema
 export const OrderItem = z
@@ -152,104 +146,90 @@ export const OrderItem = z
   })
   .omit({
     orderItemHistory: true,
-  })
-  .nullable()
-  .optional();
+  });
 
 // Product History Schema
-export const ProductHistory = z
-  .object({
-    id: z.string().nullable().optional(),
-    productId: z.string().nullable().optional(),
-    name: z.string().nullable().optional(),
-    description: z.string().nullable().optional(),
-    price: z.number().nullable().optional(),
-    discountedPrice: z.number().nullable().optional(),
-    banners: z.any().nullable().optional(),
-    specifications: z.any().nullable().optional(),
-    links: z.any().nullable().optional(),
+export const ProductHistory = z.object({
+  id: z.string().nullable().optional(),
+  productId: z.string().nullable().optional(),
+  name: z.string().nullable().optional(),
+  description: z.string().nullable().optional(),
+  price: z.number().nullable().optional(),
+  discountedPrice: z.number().nullable().optional(),
+  banners: z.any().nullable().optional(),
+  specifications: z.any().nullable().optional(),
+  links: z.any().nullable().optional(),
 
-    createdAt: z.date().nullable().optional(),
-    updatedAt: z.date().nullable().optional(),
-    deletedAt: z.date().nullable().optional(),
+  createdAt: z.date().nullable().optional(),
+  updatedAt: z.date().nullable().optional(),
+  deletedAt: z.date().nullable().optional(),
 
-    pageId: z.string().nullable().optional(),
-    categoryId: z.string().nullable().optional(),
+  pageId: z.string().nullable().optional(),
+  categoryId: z.string().nullable().optional(),
 
-    product: z
-      .lazy(() => Product.nullable().optional())
-      .nullable()
-      .optional(),
-  })
-  .nullable()
-  .optional();
+  product: z
+    .lazy(() => Product.nullable().optional())
+    .nullable()
+    .optional(),
+});
 
 // Cart Item History Schema
-export const CartItemHistory = z
-  .object({
-    id: z.string().nullable().optional(),
-    cartItemId: z.string().nullable().optional(),
-    quantity: z.number().nullable().optional(),
+export const CartItemHistory = z.object({
+  id: z.string().nullable().optional(),
+  cartItemId: z.string().nullable().optional(),
+  quantity: z.number().nullable().optional(),
 
-    createdAt: z.date().nullable().optional(),
-    updatedAt: z.date().nullable().optional(),
-    deletedAt: z.date().nullable().optional(),
+  createdAt: z.date().nullable().optional(),
+  updatedAt: z.date().nullable().optional(),
+  deletedAt: z.date().nullable().optional(),
 
-    userId: z.string().nullable().optional(),
-    productId: z.string().nullable().optional(),
+  userId: z.string().nullable().optional(),
+  productId: z.string().nullable().optional(),
 
-    cartItem: z
-      .lazy(() => CartItem.nullable().optional())
-      .nullable()
-      .optional(),
-  })
-  .nullable()
-  .optional();
+  cartItem: z
+    .lazy(() => CartItem.nullable().optional())
+    .nullable()
+    .optional(),
+});
 
 // Order History Schema
-export const OrderHistory = z
-  .object({
-    id: z.string().nullable().optional(),
-    orderId: z.string().nullable().optional(),
-    status: OrderStatus.nullable().optional(),
-    totalAmount: z.number().nullable().optional(),
+export const OrderHistory = z.object({
+  id: z.string().nullable().optional(),
+  orderId: z.string().nullable().optional(),
+  status: OrderStatus.nullable().optional(),
+  totalAmount: z.number().nullable().optional(),
 
-    createdAt: z.date().nullable().optional(),
-    updatedAt: z.date().nullable().optional(),
-    deletedAt: z.date().nullable().optional(),
+  createdAt: z.date().nullable().optional(),
+  updatedAt: z.date().nullable().optional(),
+  deletedAt: z.date().nullable().optional(),
 
-    userId: z.string().nullable().optional(),
+  userId: z.string().nullable().optional(),
 
-    order: z
-      .lazy(() => Order.nullable().optional())
-      .nullable()
-      .optional(),
-  })
-  .nullable()
-  .optional();
+  order: z
+    .lazy(() => Order.nullable().optional())
+    .nullable()
+    .optional(),
+});
 
 // Order Item History Schema
-export const OrderItemHistory = z
-  .object({
-    id: z.string().nullable().optional(),
-    orderItemId: z.string().nullable().optional(),
-    quantity: z.number().nullable().optional(),
-    price: z.number().nullable().optional(),
+export const OrderItemHistory = z.object({
+  id: z.string().nullable().optional(),
+  orderItemId: z.string().nullable().optional(),
+  quantity: z.number().nullable().optional(),
+  price: z.number().nullable().optional(),
 
-    createdAt: z.date().nullable().optional(),
-    updatedAt: z.date().nullable().optional(),
-    deletedAt: z.date().nullable().optional(),
+  createdAt: z.date().nullable().optional(),
+  updatedAt: z.date().nullable().optional(),
+  deletedAt: z.date().nullable().optional(),
 
-    orderId: z.string().nullable().optional(),
-    productId: z.string().nullable().optional(),
+  orderId: z.string().nullable().optional(),
+  productId: z.string().nullable().optional(),
 
-    orderItem: z
-      .lazy(() => OrderItem.nullable().optional())
-      .nullable()
-      .optional(),
-  })
-  .nullable()
-  .optional();
+  orderItem: z
+    .lazy(() => OrderItem.nullable().optional())
+    .nullable()
+    .optional(),
+});
 
 // Define types based on schemas
 export type Product = z.infer<typeof Product>;

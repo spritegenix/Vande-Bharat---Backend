@@ -1,12 +1,14 @@
 import { z } from 'zod';
 
 // ✅ Validate Token Request Schema (Zod)
-export const ValidateHeaderRequestDto = z.object({
+export const ValidateHeaderRequestBodyDto = z.object({
   headers: z.any(),
 });
 
 // ✅ TypeScript Type Inference for Request DTO
-export type ValidateHeaderRequestDto = z.infer<typeof ValidateHeaderRequestDto>;
+export type ValidateHeaderRequestBodyDto = z.infer<
+  typeof ValidateHeaderRequestBodyDto
+>;
 
 // ✅ Validate Token Request Schema (Zod)
 export const ValidateHeaderPayloadDto = z.object({

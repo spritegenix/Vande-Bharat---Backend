@@ -73,9 +73,7 @@ export const Group = z
   })
   .omit({
     groupHistory: true,
-  })
-  .nullable()
-  .optional();
+  });
 
 // Group Member Schema
 export const GroupMember = z
@@ -105,62 +103,54 @@ export const GroupMember = z
   })
   .omit({
     groupMemberHistory: true,
-  })
-  .nullable()
-  .optional();
+  });
 
 // Group History Schema
-export const GroupHistory = z
-  .object({
-    id: z.string().nullable().optional(),
-    groupId: z.string().nullable().optional(),
-    slug: z.string().nullable().optional(),
-    name: z.string().nullable().optional(),
-    description: z.any().nullable().optional(), // JSON field
-    privacy: GroupPrivacy.nullable().optional(),
-    isVerified: z.boolean().nullable().optional(),
-    isHidden: z.boolean().nullable().optional(),
-    isBlocked: z.boolean().nullable().optional(),
-    banner: z.string().nullable().optional(),
+export const GroupHistory = z.object({
+  id: z.string().nullable().optional(),
+  groupId: z.string().nullable().optional(),
+  slug: z.string().nullable().optional(),
+  name: z.string().nullable().optional(),
+  description: z.any().nullable().optional(), // JSON field
+  privacy: GroupPrivacy.nullable().optional(),
+  isVerified: z.boolean().nullable().optional(),
+  isHidden: z.boolean().nullable().optional(),
+  isBlocked: z.boolean().nullable().optional(),
+  banner: z.string().nullable().optional(),
 
-    createdAt: z.date().nullable().optional(),
-    updatedAt: z.date().nullable().optional(),
-    deletedAt: z.date().nullable().optional(),
+  createdAt: z.date().nullable().optional(),
+  updatedAt: z.date().nullable().optional(),
+  deletedAt: z.date().nullable().optional(),
 
-    membersCount: z.number().nullable().optional(),
+  membersCount: z.number().nullable().optional(),
 
-    ownerId: z.string().nullable().optional(),
-    categoryId: z.string().nullable().optional(),
+  ownerId: z.string().nullable().optional(),
+  categoryId: z.string().nullable().optional(),
 
-    group: z
-      .lazy(() => Group.nullable().optional())
-      .nullable()
-      .optional(),
-  })
-  .nullable()
-  .optional();
+  group: z
+    .lazy(() => Group.nullable().optional())
+    .nullable()
+    .optional(),
+});
 
 // Group Member History Schema
-export const GroupMemberHistory = z
-  .object({
-    id: z.string().nullable().optional(),
-    groupMemberId: z.string().nullable().optional(),
-    status: MemberStatus.nullable().optional(),
+export const GroupMemberHistory = z.object({
+  id: z.string().nullable().optional(),
+  groupMemberId: z.string().nullable().optional(),
+  status: MemberStatus.nullable().optional(),
 
-    createdAt: z.date().nullable().optional(),
-    updatedAt: z.date().nullable().optional(),
-    deletedAt: z.date().nullable().optional(),
+  createdAt: z.date().nullable().optional(),
+  updatedAt: z.date().nullable().optional(),
+  deletedAt: z.date().nullable().optional(),
 
-    userId: z.string().nullable().optional(),
-    groupId: z.string().nullable().optional(),
+  userId: z.string().nullable().optional(),
+  groupId: z.string().nullable().optional(),
 
-    groupMember: z
-      .lazy(() => GroupMember.nullable().optional())
-      .nullable()
-      .optional(),
-  })
-  .nullable()
-  .optional();
+  groupMember: z
+    .lazy(() => GroupMember.nullable().optional())
+    .nullable()
+    .optional(),
+});
 
 // Define types based on schemas
 export type Group = z.infer<typeof Group>;

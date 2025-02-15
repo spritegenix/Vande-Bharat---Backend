@@ -7,27 +7,21 @@ import {
 import { ZodSchema, ZodError } from 'zod';
 
 @Injectable()
-export class ZodValidationPipe<T> implements PipeTransform<unknown, T> {
+export class ZodParamValidationPipe<T> implements PipeTransform<unknown, T> {
   constructor(
     private schema: ZodSchema<T>,
     private debug: boolean = false,
   ) {}
 
   transform(value: unknown, metadata: ArgumentMetadata): T {
-    // console.log('Validating value:', value);
-    // console.log('Metadata:', metadata);
-    if (this.debug) {
-      console.log('Validating value:', value);
-      console.log('Metadata:', metadata);
-    }
-
+    // console.log(value, metadata);
     // Return early if value is undefined or null and we're not validating body
-    if ((value === undefined || value === null) && metadata.type !== 'body') {
+    if ((value === undefined || value === null) && metadata.type !== 'param') {
       return value as T;
     }
 
     // Only validate if we're transforming the request body
-    if (metadata.type === 'body') {
+    if (metadata.type === 'param') {
       try {
         const result = this.schema.safeParse(value);
 

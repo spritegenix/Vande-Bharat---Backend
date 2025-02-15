@@ -41,33 +41,28 @@ export const Address = z
   })
   .omit({
     addressHistory: true,
-  })
-  .nullable()
-  .optional();
+  });
 
 // Address History Schema
-export const AddressHistory = z
-  .object({
-    id: z.string().nullable().optional(),
-    addressId: z.string().nullable().optional(),
-    order: z.number().nullable().optional(),
-    street: z.string().nullable().optional(),
-    city: z.string().nullable().optional(),
-    state: z.string().nullable().optional(),
-    country: z.string().nullable().optional(),
-    pincode: z.string().nullable().optional(),
+export const AddressHistory = z.object({
+  id: z.string().nullable().optional(),
+  addressId: z.string().nullable().optional(),
+  order: z.number().nullable().optional(),
+  street: z.string().nullable().optional(),
+  city: z.string().nullable().optional(),
+  state: z.string().nullable().optional(),
+  country: z.string().nullable().optional(),
+  pincode: z.string().nullable().optional(),
 
-    createdAt: z.date().nullable().optional(),
-    updatedAt: z.date().nullable().optional(),
-    deletedAt: z.date().nullable().optional(),
+  createdAt: z.date().nullable().optional(),
+  updatedAt: z.date().nullable().optional(),
+  deletedAt: z.date().nullable().optional(),
 
-    address: z
-      .lazy(() => Address.nullable().optional())
-      .nullable()
-      .optional(),
-  })
-  .nullable()
-  .optional();
+  address: z
+    .lazy(() => Address.nullable().optional())
+    .nullable()
+    .optional(),
+});
 
 // Types inferred correctly
 export type Address = z.infer<typeof Address>;

@@ -53,9 +53,7 @@ export const Report = z
   })
   .omit({
     reportHistory: true,
-  })
-  .nullable()
-  .optional();
+  });
 
 // Report Type Schema
 export const ReportType = z
@@ -78,54 +76,46 @@ export const ReportType = z
   })
   .omit({
     reportTypeHistory: true,
-  })
-  .nullable()
-  .optional();
+  });
 
 // Report History Schema
-export const ReportHistory = z
-  .object({
-    id: z.string().nullable().optional(),
-    reportId: z.string().nullable().optional(),
-    message: z.string().nullable().optional(),
+export const ReportHistory = z.object({
+  id: z.string().nullable().optional(),
+  reportId: z.string().nullable().optional(),
+  message: z.string().nullable().optional(),
 
-    createdAt: z.date().nullable().optional(),
-    updatedAt: z.date().nullable().optional(),
-    deletedAt: z.date().nullable().optional(),
+  createdAt: z.date().nullable().optional(),
+  updatedAt: z.date().nullable().optional(),
+  deletedAt: z.date().nullable().optional(),
 
-    reportTypeId: z.string().nullable().optional(),
-    userId: z.string().nullable().optional(),
-    pageId: z.string().nullable().optional(),
-    groupId: z.string().nullable().optional(),
-    postId: z.string().nullable().optional(),
-    commentId: z.string().nullable().optional(),
+  reportTypeId: z.string().nullable().optional(),
+  userId: z.string().nullable().optional(),
+  pageId: z.string().nullable().optional(),
+  groupId: z.string().nullable().optional(),
+  postId: z.string().nullable().optional(),
+  commentId: z.string().nullable().optional(),
 
-    report: z
-      .lazy(() => Report.nullable().optional())
-      .nullable()
-      .optional(),
-  })
-  .nullable()
-  .optional();
+  report: z
+    .lazy(() => Report.nullable().optional())
+    .nullable()
+    .optional(),
+});
 
 // Report Type History Schema
-export const ReportTypeHistory = z
-  .object({
-    id: z.string().nullable().optional(),
-    reportTypeId: z.string().nullable().optional(),
-    name: z.string().nullable().optional(),
+export const ReportTypeHistory = z.object({
+  id: z.string().nullable().optional(),
+  reportTypeId: z.string().nullable().optional(),
+  name: z.string().nullable().optional(),
 
-    createdAt: z.date().nullable().optional(),
-    updatedAt: z.date().nullable().optional(),
-    deletedAt: z.date().nullable().optional(),
+  createdAt: z.date().nullable().optional(),
+  updatedAt: z.date().nullable().optional(),
+  deletedAt: z.date().nullable().optional(),
 
-    reportType: z
-      .lazy(() => ReportType.nullable().optional())
-      .nullable()
-      .optional(),
-  })
-  .nullable()
-  .optional();
+  reportType: z
+    .lazy(() => ReportType.nullable().optional())
+    .nullable()
+    .optional(),
+});
 
 // Define types based on schemas
 export type Report = z.infer<typeof Report>;

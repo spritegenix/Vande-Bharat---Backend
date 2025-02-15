@@ -60,9 +60,7 @@ export const Post = z
   })
   .omit({
     postHistory: true,
-  })
-  .nullable()
-  .optional();
+  });
 
 // Comment Schema
 export const Comment = z
@@ -115,9 +113,7 @@ export const Comment = z
   })
   .omit({
     commentHistory: true,
-  })
-  .nullable()
-  .optional();
+  });
 
 // Reaction Schema
 export const Reaction = z
@@ -152,9 +148,7 @@ export const Reaction = z
   })
   .omit({
     reactionHistory: true,
-  })
-  .nullable()
-  .optional();
+  });
 
 // Bookmark Schema
 export const Bookmark = z
@@ -183,100 +177,86 @@ export const Bookmark = z
   })
   .omit({
     bookmarkHistory: true,
-  })
-  .nullable()
-  .optional();
+  });
 
 // Post History Schema
-export const PostHistory = z
-  .object({
-    id: z.string().nullable().optional(),
-    postId: z.string().nullable().optional(),
-    text: z.string().nullable().optional(),
-    media: z.any().nullable().optional(),
-    isPinned: z.boolean().nullable().optional(),
+export const PostHistory = z.object({
+  id: z.string().nullable().optional(),
+  postId: z.string().nullable().optional(),
+  text: z.string().nullable().optional(),
+  media: z.any().nullable().optional(),
+  isPinned: z.boolean().nullable().optional(),
 
-    createdAt: z.date().nullable().optional(),
-    updatedAt: z.date().nullable().optional(),
-    deletedAt: z.date().nullable().optional(),
+  createdAt: z.date().nullable().optional(),
+  updatedAt: z.date().nullable().optional(),
+  deletedAt: z.date().nullable().optional(),
 
-    groupId: z.string().nullable().optional(),
-    pageId: z.string().nullable().optional(),
+  groupId: z.string().nullable().optional(),
+  pageId: z.string().nullable().optional(),
 
-    post: z
-      .lazy(() => Post.nullable().optional())
-      .nullable()
-      .optional(),
-  })
-  .nullable()
-  .optional();
+  post: z
+    .lazy(() => Post.nullable().optional())
+    .nullable()
+    .optional(),
+});
 
 // Comment History Schema
-export const CommentHistory = z
-  .object({
-    id: z.string().nullable().optional(),
-    commentId: z.string().nullable().optional(),
-    text: z.string().nullable().optional(),
-    media: z.any().nullable().optional(),
+export const CommentHistory = z.object({
+  id: z.string().nullable().optional(),
+  commentId: z.string().nullable().optional(),
+  text: z.string().nullable().optional(),
+  media: z.any().nullable().optional(),
 
-    createdAt: z.date().nullable().optional(),
-    updatedAt: z.date().nullable().optional(),
-    deletedAt: z.date().nullable().optional(),
+  createdAt: z.date().nullable().optional(),
+  updatedAt: z.date().nullable().optional(),
+  deletedAt: z.date().nullable().optional(),
 
-    authorId: z.string().nullable().optional(),
-    postId: z.string().nullable().optional(),
-    parentId: z.string().nullable().optional(),
+  authorId: z.string().nullable().optional(),
+  postId: z.string().nullable().optional(),
+  parentId: z.string().nullable().optional(),
 
-    comment: z
-      .lazy(() => Comment.nullable().optional())
-      .nullable()
-      .optional(),
-  })
-  .nullable()
-  .optional();
+  comment: z
+    .lazy(() => Comment.nullable().optional())
+    .nullable()
+    .optional(),
+});
 
 // Reaction History Schema
-export const ReactionHistory = z
-  .object({
-    id: z.string().nullable().optional(),
-    reactionId: z.string().nullable().optional(),
-    emoji: z.string().nullable().optional(),
+export const ReactionHistory = z.object({
+  id: z.string().nullable().optional(),
+  reactionId: z.string().nullable().optional(),
+  emoji: z.string().nullable().optional(),
 
-    createdAt: z.date().nullable().optional(),
-    updatedAt: z.date().nullable().optional(),
-    deletedAt: z.date().nullable().optional(),
+  createdAt: z.date().nullable().optional(),
+  updatedAt: z.date().nullable().optional(),
+  deletedAt: z.date().nullable().optional(),
 
-    userId: z.string().nullable().optional(),
-    postId: z.string().nullable().optional(),
-    commentId: z.string().nullable().optional(),
+  userId: z.string().nullable().optional(),
+  postId: z.string().nullable().optional(),
+  commentId: z.string().nullable().optional(),
 
-    reaction: z
-      .lazy(() => Reaction.nullable().optional())
-      .nullable()
-      .optional(),
-  })
-  .nullable()
-  .optional();
+  reaction: z
+    .lazy(() => Reaction.nullable().optional())
+    .nullable()
+    .optional(),
+});
 
 // Bookmark History Schema
-export const BookmarkHistory = z
-  .object({
-    id: z.string().nullable().optional(),
-    bookmarkId: z.string().nullable().optional(),
-    userId: z.string().nullable().optional(),
-    postId: z.string().nullable().optional(),
+export const BookmarkHistory = z.object({
+  id: z.string().nullable().optional(),
+  bookmarkId: z.string().nullable().optional(),
+  userId: z.string().nullable().optional(),
+  postId: z.string().nullable().optional(),
 
-    createdAt: z.date().nullable().optional(),
-    updatedAt: z.date().nullable().optional(),
-    deletedAt: z.date().nullable().optional(),
+  createdAt: z.date().nullable().optional(),
+  updatedAt: z.date().nullable().optional(),
+  deletedAt: z.date().nullable().optional(),
 
-    bookmark: z
-      .lazy(() => Bookmark.nullable().optional())
-      .nullable()
-      .optional(),
-  })
-  .nullable()
-  .optional();
+  bookmark: z
+    .lazy(() => Bookmark.nullable().optional())
+    .nullable()
+    .optional(),
+});
 
 // Define types based on schemas
 export type Post = z.infer<typeof Post>;

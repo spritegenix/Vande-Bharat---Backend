@@ -8,7 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { ErrorUtil } from './utils/error.utils';
 
 import { ForbiddenException } from '@nestjs/common';
-import { SignupRequestDto, VerifyOtpRequestDto } from '@app/dtos';
+import { SignupRequestBodyDto, VerifyOtpRequestBodyDto } from '@app/dtos';
 
 describe('AuthService', () => {
   let authService: AuthService;
@@ -58,7 +58,7 @@ describe('AuthService', () => {
       email: 'test@example.com',
       password: 'password',
       name: 'Test Page',
-    } as SignupRequestDto);
+    } as SignupRequestBodyDto);
 
     expect(result.message).toContain('Verification code sent');
     // userId = '1'; // ✅ Store user ID for future tests
@@ -77,7 +77,7 @@ describe('AuthService', () => {
     //   },
     // } as any);
 
-    const dto: VerifyOtpRequestDto = {
+    const dto: VerifyOtpRequestBodyDto = {
       email: 'test@example.com',
       otp: '999999', // ❌ Incorrect OTP
     };
@@ -112,7 +112,7 @@ describe('AuthService', () => {
     //   },
     // } as any);
 
-    const dto: VerifyOtpRequestDto = {
+    const dto: VerifyOtpRequestBodyDto = {
       email: 'test@example.com',
       otp: '123456', // ✅ Correct OTP
     };
@@ -134,7 +134,7 @@ describe('AuthService', () => {
         email: 'test@example.com',
         password: 'password',
         name: 'Test Page',
-      } as SignupRequestDto),
+      } as SignupRequestBodyDto),
     ).rejects.toThrow(new ForbiddenException('Credentials already in use'));
   });
 });

@@ -23,9 +23,7 @@ export const Admin = z
   })
   .omit({
     adminHistory: true,
-  })
-  .nullable()
-  .optional();
+  });
 
 export const AdminRole = z
   .object({
@@ -48,48 +46,40 @@ export const AdminRole = z
   })
   .omit({
     adminRoleHistory: true,
-  })
-  .nullable()
-  .optional();
+  });
 
-export const AdminHistory = z
-  .object({
-    id: z.string().nullable().optional(),
-    adminId: z.string().nullable().optional(),
-    email: z.string().email().nullable().optional(),
-    name: z.string().nullable().optional(),
-    avatar: z.string().nullable().optional(),
+export const AdminHistory = z.object({
+  id: z.string().nullable().optional(),
+  adminId: z.string().nullable().optional(),
+  email: z.string().email().nullable().optional(),
+  name: z.string().nullable().optional(),
+  avatar: z.string().nullable().optional(),
 
-    createdAt: z.date().nullable().optional(),
-    updatedAt: z.date().nullable().optional(),
-    deletedAt: z.date().nullable().optional(),
+  createdAt: z.date().nullable().optional(),
+  updatedAt: z.date().nullable().optional(),
+  deletedAt: z.date().nullable().optional(),
 
-    admin: z
-      .lazy(() => Admin.nullable().optional())
-      .nullable()
-      .optional(), // Lazy reference
-  })
-  .nullable()
-  .optional();
+  admin: z
+    .lazy(() => Admin.nullable().optional())
+    .nullable()
+    .optional(), // Lazy reference
+});
 
-export const AdminRoleHistory = z
-  .object({
-    id: z.string().nullable().optional(),
-    adminRoleId: z.string().nullable().optional(),
-    name: z.string().nullable().optional(),
-    permissions: z.any().nullable().optional(),
+export const AdminRoleHistory = z.object({
+  id: z.string().nullable().optional(),
+  adminRoleId: z.string().nullable().optional(),
+  name: z.string().nullable().optional(),
+  permissions: z.any().nullable().optional(),
 
-    createdAt: z.date().nullable().optional(),
-    updatedAt: z.date().nullable().optional(),
-    deletedAt: z.date().nullable().optional(),
+  createdAt: z.date().nullable().optional(),
+  updatedAt: z.date().nullable().optional(),
+  deletedAt: z.date().nullable().optional(),
 
-    adminRole: z
-      .lazy(() => AdminRole.nullable().optional())
-      .nullable()
-      .optional(), // Lazy reference
-  })
-  .nullable()
-  .optional();
+  adminRole: z
+    .lazy(() => AdminRole.nullable().optional())
+    .nullable()
+    .optional(), // Lazy reference
+});
 
 // Define types correctly
 export type AdminRole = z.infer<typeof AdminRole>;

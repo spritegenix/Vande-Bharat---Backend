@@ -20,7 +20,6 @@ export class ZodResponseInterceptor<T> implements NestInterceptor<unknown, T> {
     return next.handle().pipe(
       map((data) => {
         try {
-          // console.log(data);
           // Use safeParse instead of parse for better error handling
           const result = this.schema.safeParse(data);
 

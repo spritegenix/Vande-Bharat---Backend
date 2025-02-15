@@ -82,9 +82,7 @@ export const Page = z
   })
   .omit({
     pageHistory: true,
-  })
-  .nullable()
-  .optional();
+  });
 
 // Page Follower Schema
 export const PageFollower = z
@@ -113,62 +111,54 @@ export const PageFollower = z
   })
   .omit({
     pageFollowerHistory: true,
-  })
-  .nullable()
-  .optional();
+  });
 
 // Page History Schema
-export const PageHistory = z
-  .object({
-    id: z.string().nullable().optional(),
-    pageId: z.string().nullable().optional(),
-    slug: z.string().nullable().optional(),
-    name: z.string().nullable().optional(),
-    description: z.string().nullable().optional(),
-    banner: z.string().nullable().optional(),
-    avatar: z.string().nullable().optional(),
-    pageContactDetails: z.any().nullable().optional(), // JSON field
-    isVerified: z.boolean().nullable().optional(),
-    isDefault: z.boolean().nullable().optional(),
-    isHidden: z.boolean().nullable().optional(),
-    isBlocked: z.boolean().nullable().optional(),
+export const PageHistory = z.object({
+  id: z.string().nullable().optional(),
+  pageId: z.string().nullable().optional(),
+  slug: z.string().nullable().optional(),
+  name: z.string().nullable().optional(),
+  description: z.string().nullable().optional(),
+  banner: z.string().nullable().optional(),
+  avatar: z.string().nullable().optional(),
+  pageContactDetails: z.any().nullable().optional(), // JSON field
+  isVerified: z.boolean().nullable().optional(),
+  isDefault: z.boolean().nullable().optional(),
+  isHidden: z.boolean().nullable().optional(),
+  isBlocked: z.boolean().nullable().optional(),
 
-    createdAt: z.date().nullable().optional(),
-    updatedAt: z.date().nullable().optional(),
-    deletedAt: z.date().nullable().optional(),
+  createdAt: z.date().nullable().optional(),
+  updatedAt: z.date().nullable().optional(),
+  deletedAt: z.date().nullable().optional(),
 
-    followerCount: z.number().nullable().optional(),
-    postCount: z.number().nullable().optional(),
+  followerCount: z.number().nullable().optional(),
+  postCount: z.number().nullable().optional(),
 
-    ownerId: z.string().nullable().optional(),
-    page: z
-      .lazy(() => Page.nullable().optional())
-      .nullable()
-      .optional(),
-  })
-  .nullable()
-  .optional();
+  ownerId: z.string().nullable().optional(),
+  page: z
+    .lazy(() => Page.nullable().optional())
+    .nullable()
+    .optional(),
+});
 
 // Page Follower History Schema
-export const PageFollowerHistory = z
-  .object({
-    id: z.string().nullable().optional(),
-    pageFollowerId: z.string().nullable().optional(),
+export const PageFollowerHistory = z.object({
+  id: z.string().nullable().optional(),
+  pageFollowerId: z.string().nullable().optional(),
 
-    createdAt: z.date().nullable().optional(),
-    updatedAt: z.date().nullable().optional(),
-    deletedAt: z.date().nullable().optional(),
+  createdAt: z.date().nullable().optional(),
+  updatedAt: z.date().nullable().optional(),
+  deletedAt: z.date().nullable().optional(),
 
-    userId: z.string().nullable().optional(),
-    pageId: z.string().nullable().optional(),
+  userId: z.string().nullable().optional(),
+  pageId: z.string().nullable().optional(),
 
-    pageFollower: z
-      .lazy(() => PageFollower.nullable().optional())
-      .nullable()
-      .optional(),
-  })
-  .nullable()
-  .optional();
+  pageFollower: z
+    .lazy(() => PageFollower.nullable().optional())
+    .nullable()
+    .optional(),
+});
 
 // Define types based on schemas
 export type Page = z.infer<typeof Page>;

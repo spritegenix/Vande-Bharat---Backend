@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 // ✅ Verify OTP Request Schema (Zod)
-export const VerifyOtpRequestDto = z
+export const VerifyOtpRequestBodyDto = z
   .object({
     email: z.string().email().optional(),
     phone: z
@@ -16,7 +16,7 @@ export const VerifyOtpRequestDto = z
   });
 
 // ✅ TypeScript Type Inference for Request DTO
-export type VerifyOtpRequestDto = z.infer<typeof VerifyOtpRequestDto>;
+export type VerifyOtpRequestBodyDto = z.infer<typeof VerifyOtpRequestBodyDto>;
 
 // ✅ Verify OTP Request Schema (Zod)
 export const VerifyOtpPayloadDto = z

@@ -1,7 +1,6 @@
 import * as Exception from '@nestjs/common/exceptions';
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
-import * as PrismaExceptions from '@prisma/client/extension';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 
 @Injectable()
@@ -21,30 +20,33 @@ export class ErrorUtil {
       );
   })();
 
-  private static readonly prismaExceptions: Record<string, any> = (() => {
-    return Object.keys(PrismaExceptions)
-      .filter((key) => key.startsWith('P')) // Filter Prisma error codes
-      .reduce(
-        (acc, key) => {
-          acc[key] = PrismaExceptions[key];
-          return acc;
-        },
-        {} as Record<string, any>,
-      );
-  })();
+  private static readonly prismaErrorMap: Record<
+    string,
+    { status: number; message: string }
+  > = {
+    P2002: { status: 409, message: 'Unique constraint failed' },
+    P2003: { status: 400, message: 'Foreign key constraint failed' },
+    P2025: { status: 404, message: 'Record not found' },
+    P2014: { status: 400, message: 'Relation violation' },
+    P2015: { status: 400, message: 'Related record not found' },
+    // Add more error codes if needed
+  };
 
   handleError(error: any) {
+    console.error('Error:', error);
     // Handle Prisma Errors using PrismaExceptions dynamically
     if (error instanceof PrismaClientKnownRequestError) {
-      const exceptionData = ErrorUtil.prismaExceptions[error.code];
-      if (exceptionData) {
-        const ExceptionClass =
-          ErrorUtil.httpExceptions[exceptionData.status] ||
-          Exception.InternalServerErrorException;
-        throw new ExceptionClass(
-          `${exceptionData.message}: ${error.meta?.target || 'unknown'}`,
+      const mappedError = ErrorUtil.prismaErrorMap[error.code];
+      if (mappedError) {
+        throw new Exception.HttpException(
+          mappedError.message,
+          mappedError.status,
         );
       }
+      // If Prisma error is unknown, return a generic database error
+      throw new Exception.InternalServerErrorException(
+        `Database error: ${error.message}`,
+      );
     }
 
     // If the error is already a NestJS HTTP Exception, rethrow it

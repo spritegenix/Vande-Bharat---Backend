@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const AddCredentialRequestDto = z
+export const AddCredentialRequestBodyDto = z
   .object({
     email: z.string().email().optional(),
     phone: z
@@ -13,7 +13,9 @@ export const AddCredentialRequestDto = z
     path: ['email', 'phone'],
   });
 
-export type AddCredentialRequestDto = z.infer<typeof AddCredentialRequestDto>;
+export type AddCredentialRequestBodyDto = z.infer<
+  typeof AddCredentialRequestBodyDto
+>;
 
 export const AddCredentialPayloadDto = z
   .object({

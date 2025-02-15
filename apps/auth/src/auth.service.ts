@@ -219,7 +219,7 @@ export class AuthService {
       const tokenPayload = await this.verifyToken(payload.headers);
 
       if (!tokenPayload) {
-        throw new UnauthorizedException('User not found');
+        throw new UnauthorizedException('Invalid token');
       }
 
       user = await this.prisma.user.findUnique({
@@ -236,13 +236,20 @@ export class AuthService {
   }
 
   private async verifyToken(headers: any) {
-    const authHeader = headers?.authorization;
+    try {
+      if (!headers?.authorization) {
+        return null;
+      }
+      const authHeader = headers?.authorization;
 
-    const token = authHeader?.startsWith('Bearer ')
-      ? authHeader.split(' ')[1]
-      : null;
+      const token = authHeader?.startsWith('Bearer ')
+        ? authHeader.split(' ')[1]
+        : null;
 
-    return await this.jwtUtil.verifyToken(token);
+      return await this.jwtUtil.verifyToken(token);
+    } catch {
+      throw new UnauthorizedException('JWT verification failed');
+    }
   }
 
   async addCredential(payload: AddCredentialPayloadDto) {
