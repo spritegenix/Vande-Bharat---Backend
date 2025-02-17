@@ -49,8 +49,6 @@ export class FileUtil {
     try {
       if (!file) throw new Error('File is required for upload.');
 
-      console.log(file);
-
       // Generate unique filename
       const uniqueFileName = uuid();
       const fileExtension = file.originalname.split('.').pop();
@@ -82,7 +80,6 @@ export class FileUtil {
     try {
       const key = this.extractKey(url);
 
-      console.log(key);
       await this.s3Client.deleteObject({
         Bucket: this.bucketName,
         Key: key,

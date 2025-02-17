@@ -41,6 +41,12 @@
       ],
       "@app/interceptors/*": [
         "libs/interceptors/src/*"
+      ],
+      "@app/logger": [
+        "libs/logger/src"
+      ],
+      "@app/logger/*": [
+        "libs/logger/src/*"
       ]
     }
   }

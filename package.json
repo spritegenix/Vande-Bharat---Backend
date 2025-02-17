@@ -39,6 +39,7 @@
     "express-session": "^1.18.1",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
+    "nest-winston": "^1.10.2",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "prisma": "^6.3.1",
@@ -46,6 +47,8 @@
     "rxjs": "^7.8.1",
     "slugify": "^1.6.6",
     "uuid": "^11.0.5",
+    "winston": "^3.17.0",
+    "winston-daily-rotate-file": "^5.0.0",
     "zod": "^3.24.1"
   },
   "devDependencies": {
@@ -98,7 +101,8 @@
       "^@app/prisma(|/.*)$": "<rootDir>/libs/prisma/src/$1",
       "^@app/contracts(|/.*)$": "<rootDir>/libs/contracts/src/$1",
       "^@app/pipes(|/.*)$": "<rootDir>/libs/pipes/src/$1",
-      "^@app/interceptors(|/.*)$": "<rootDir>/libs/interceptors/src/$1"
+      "^@app/interceptors(|/.*)$": "<rootDir>/libs/interceptors/src/$1",
+      "^@app/logger(|/.*)$": "<rootDir>/libs/logger/src/$1"
     }
   }
 }

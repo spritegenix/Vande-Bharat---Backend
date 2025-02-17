@@ -1,3 +1,4 @@
+// import { Logger } from '@app/logger';
 import {
   ArgumentMetadata,
   BadRequestException,
@@ -14,7 +15,10 @@ export class ZodParamValidationPipe<T> implements PipeTransform<unknown, T> {
   ) {}
 
   transform(value: unknown, metadata: ArgumentMetadata): T {
-    // console.log(value, metadata);
+    // const logger = new Logger();
+    // logger.warn('value', JSON.stringify(value));
+    // logger.warn('metadata', JSON.stringify(metadata));
+
     // Return early if value is undefined or null and we're not validating body
     if ((value === undefined || value === null) && metadata.type !== 'param') {
       return value as T;

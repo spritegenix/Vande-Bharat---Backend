@@ -12,9 +12,11 @@ import {
   PasswordUtil,
   SlugUtil,
 } from './utils';
+import { LoggerModule } from '@app/logger';
 
 @Module({
   imports: [
+    LoggerModule,
     PrismaModule,
     JwtModule.register({}),
     ConfigModule.forRoot({
