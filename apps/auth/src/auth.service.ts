@@ -21,6 +21,7 @@ import {
   ValidateHeaderPayloadDto,
   VerifyOtpPayloadDto,
 } from '@app/dtos';
+import * as uuid from 'uuid';
 
 @Injectable()
 export class AuthService {
@@ -63,12 +64,18 @@ export class AuthService {
           'PHONE',
         );
 
+        const id = uuid.v7();
+
         const hash = await this.passwordUtil.hashPassword(payload.password);
 
         const user = await tx.user.create({
           data: {
+            id: id,
+            name: payload.name,
             hash,
-            ownedPages: { create: { name: payload.name, isDefault: true } },
+            ownedPages: {
+              create: { id: id, name: payload.name, isDefault: true },
+            },
           },
         });
 
@@ -110,7 +117,7 @@ export class AuthService {
       }
 
       const slug = await this.slugUtil.createUserSlug(
-        credential.user.ownedPages[0].name,
+        credential.user.name,
         credential.user.id,
       );
 

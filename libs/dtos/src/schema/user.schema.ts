@@ -15,6 +15,9 @@ export type CredentialType = z.infer<typeof CredentialType>;
 export const User = z
   .object({
     id: z.string().nullable().optional(),
+    slug: z.string().nullable().optional(),
+    name: z.string().nullable().optional(),
+    avatar: z.string().nullable().optional(),
     hash: z.string().nullable().optional(),
     isVerified: z.boolean().nullable().optional(),
     isHidden: z.boolean().nullable().optional(),
@@ -154,6 +157,9 @@ export const Credential = z
 export const UserHistory = z.object({
   id: z.string().nullable().optional(),
   userId: z.string().nullable().optional(),
+  slug: z.string().nullable().optional(),
+  name: z.string().nullable().optional(),
+  avatar: z.string().nullable().optional(),
   hash: z.string().nullable().optional(),
   isVerified: z.boolean().nullable().optional(),
   isHidden: z.boolean().nullable().optional(),

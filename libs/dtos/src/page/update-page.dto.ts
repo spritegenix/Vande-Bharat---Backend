@@ -3,18 +3,22 @@ import { Page } from '../schema';
 
 // ✅ Signup Request Schema (Zod)
 export const UpdatePageRequestBodyDto = z.object({
-  name: z.string().optional(),
-  description: z.string().optional(),
+  name: z.string().trim().optional(),
+  description: z.string().trim().optional(),
   pageContactDetails: z
-    .any()
+    .unknown() // Use unknown for better safety than z.any()
     .transform((val) => {
-      try {
-        return val
-          ? JSON.parse(typeof val === 'string' ? val : JSON.stringify(val))
-          : undefined;
-      } catch {
-        return undefined; // or throw new Error("Invalid JSON input");
+      if (val) {
+        try {
+          // Check if the value is a valid JSON string or object, and parse it accordingly
+          return typeof val === 'string'
+            ? JSON.parse(val) // If it's a string, parse it
+            : val; // If it's already an object, return as is
+        } catch {
+          return undefined; // Return undefined if JSON parsing fails
+        }
       }
+      return undefined; // If val is falsy, return undefined
     })
     .optional(),
 });
@@ -24,7 +28,13 @@ export type UpdatePageRequestBodyDto = z.infer<typeof UpdatePageRequestBodyDto>;
 
 // ✅ Signup Request Schema (Zod)
 export const UpdatePageRequestParamDto = z.object({
-  pageId: z.string().min(1, 'Page ID is required'),
+  pageId: z
+    .string()
+    .trim()
+    .min(1, 'Page Follower ID is required')
+    .refine((val) => /^[a-fA-F0-9-]+$/.test(val), {
+      message: 'Invalid Page Follower ID format',
+    }),
 });
 
 // ✅ TypeScript Type Inference

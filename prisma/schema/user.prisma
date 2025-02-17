@@ -1,6 +1,9 @@
 // Base user model
 model User {
     id         String  @id @default(uuid())
+    slug       String? @unique
+    name       String
+    avatar     String?
     hash       String?
     isVerified Boolean @default(false)
     isHidden   Boolean @default(false)
@@ -82,6 +85,9 @@ enum CredentialType {
 model UserHistory {
     id         String   @id @default(uuid())
     userId     String // Reference to original user
+    slug       String?
+    name       String?
+    avatar     String?
     hash       String?
     isVerified Boolean  @default(false)
     isHidden   Boolean?

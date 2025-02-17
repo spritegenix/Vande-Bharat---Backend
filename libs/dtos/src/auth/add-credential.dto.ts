@@ -2,9 +2,10 @@ import { z } from 'zod';
 
 export const AddCredentialRequestBodyDto = z
   .object({
-    email: z.string().email().optional(),
+    email: z.string().trim().email().optional(),
     phone: z
       .string()
+      .trim()
       .regex(/^\+\d{1,3}\d{7,14}$/, 'Invalid phone number format')
       .optional(),
   })
@@ -19,10 +20,11 @@ export type AddCredentialRequestBodyDto = z.infer<
 
 export const AddCredentialPayloadDto = z
   .object({
-    id: z.string(),
-    email: z.string().email().optional(),
+    id: z.string().trim(),
+    email: z.string().trim().email().optional(),
     phone: z
       .string()
+      .trim()
       .regex(/^\+\d{1,3}\d{7,14}$/, 'Invalid phone number format')
       .optional(),
   })

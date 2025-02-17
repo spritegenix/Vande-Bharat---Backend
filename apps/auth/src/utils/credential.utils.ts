@@ -3,6 +3,7 @@ import { CredentialType, Prisma } from '@prisma/client';
 import { OtpUtil } from './otp.utils';
 import { Injectable } from '@nestjs/common';
 import { ErrorUtil } from './error.utils';
+import * as uuid from 'uuid';
 
 @Injectable()
 export class CredentialUtil {
@@ -24,6 +25,7 @@ export class CredentialUtil {
       );
       await tx.credential.create({
         data: {
+          id: uuid.v7(),
           user: { connect: { id: userId } },
           type,
           value,

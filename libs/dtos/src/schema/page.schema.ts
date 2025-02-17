@@ -25,6 +25,7 @@ export const Page = z
     banner: z.string().nullable().optional(),
     avatar: z.string().nullable().optional(),
     pageContactDetails: z.any().nullable().optional(), // JSON field
+    privacy: z.string().nullable().optional(),
     isVerified: z.boolean().nullable().optional(),
     isDefault: z.boolean().nullable().optional(),
     isHidden: z.boolean().nullable().optional(),
@@ -123,6 +124,7 @@ export const PageHistory = z.object({
   banner: z.string().nullable().optional(),
   avatar: z.string().nullable().optional(),
   pageContactDetails: z.any().nullable().optional(), // JSON field
+  privacy: z.string().nullable().optional(),
   isVerified: z.boolean().nullable().optional(),
   isDefault: z.boolean().nullable().optional(),
   isHidden: z.boolean().nullable().optional(),

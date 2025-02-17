@@ -1,18 +1,19 @@
 // Page related models
 model Page {
-    id                 String    @id @default(uuid())
-    slug               String?   @unique
+    id                 String      @id @default(uuid())
+    slug               String?     @unique
     name               String
     description        String?
     banner             String?
     avatar             String?
     pageContactDetails Json?
-    isVerified         Boolean   @default(false)
-    isDefault          Boolean   @default(false) // Enforce only one default per user
-    isHidden           Boolean   @default(false)
-    isBlocked          Boolean   @default(false)
-    createdAt          DateTime  @default(now())
-    updatedAt          DateTime  @updatedAt
+    privacy            PagePrivacy @default(PUBLIC)
+    isVerified         Boolean     @default(false)
+    isDefault          Boolean     @default(false) // Enforce only one default per user
+    isHidden           Boolean     @default(false)
+    isBlocked          Boolean     @default(false)
+    createdAt          DateTime    @default(now())
+    updatedAt          DateTime    @updatedAt
     deletedAt          DateTime?
 
     followerCount Int? @default(0)
@@ -33,6 +34,11 @@ model Page {
 
     @@index([ownerId])
     @@map("pages")
+}
+
+enum PagePrivacy {
+    PRIVATE
+    PUBLIC
 }
 
 model PageFollower {
@@ -70,6 +76,7 @@ model PageHistory {
     banner             String?
     avatar             String?
     pageContactDetails Json?
+    privacy            String?
     isVerified         Boolean?
     isDefault          Boolean?
     idHidden           Boolean?

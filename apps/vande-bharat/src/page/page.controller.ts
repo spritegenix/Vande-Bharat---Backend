@@ -15,7 +15,12 @@ import { ZodResponseInterceptor } from '@app/interceptors/zod';
 import {
   CreatePageRequestBodyDto,
   CreatePageResponseDto,
-  MyPagesResponseDto,
+  GetMyPagesResponseDto,
+  GetPageFollowerRequestParamDto,
+  GetPageFollowerResponseDto,
+  UpdateFollowStatusRequestBodyDto,
+  UpdateFollowStatusRequestParamDto,
+  UpdateFollowStatusResponseDto,
   UpdatePageRequestBodyDto,
   UpdatePageRequestParamDto,
   UpdatePageResponseDto,
@@ -32,7 +37,7 @@ export class PageController {
   constructor(private readonly pageService: PageService) {}
 
   @Get('me')
-  @UseInterceptors(new ZodResponseInterceptor(MyPagesResponseDto))
+  @UseInterceptors(new ZodResponseInterceptor(GetMyPagesResponseDto))
   async getMyPages(@GetUser() user: ValidateHeaderResponseDto) {
     return await this.pageService.getMyPages(user);
   }
@@ -63,7 +68,6 @@ export class PageController {
     new ZodParamValidationPipe(UpdatePageRequestParamDto),
     new ZodBodyValidationPipe(UpdatePageRequestBodyDto),
   )
-  @UsePipes()
   @UseInterceptors(
     FileFieldsInterceptor([
       { name: 'avatar', maxCount: 1 },
@@ -82,5 +86,29 @@ export class PageController {
     },
   ) {
     return await this.pageService.updatePage(user, param, body, files);
+  }
+
+  @Get(':pageId/page-followers')
+  @UsePipes(new ZodParamValidationPipe(GetPageFollowerRequestParamDto))
+  @UseInterceptors(new ZodResponseInterceptor(GetPageFollowerResponseDto))
+  async getPageFollowers(
+    @GetUser() user: ValidateHeaderResponseDto,
+    @Param() param: GetPageFollowerRequestParamDto,
+  ) {
+    return await this.pageService.getPageFollowers(user, param);
+  }
+
+  @Put(':pageId/page-follower/:pageFollowerId')
+  @UsePipes(
+    new ZodParamValidationPipe(UpdateFollowStatusRequestParamDto),
+    new ZodBodyValidationPipe(UpdateFollowStatusRequestBodyDto),
+  )
+  @UseInterceptors(new ZodResponseInterceptor(UpdateFollowStatusResponseDto))
+  async updateFollowStatus(
+    @GetUser() user: ValidateHeaderResponseDto,
+    @Param() param: UpdateFollowStatusRequestParamDto,
+    @Body() body: UpdateFollowStatusRequestBodyDto,
+  ) {
+    return await this.pageService.updateFollowStatus(user, param, body);
   }
 }

@@ -3,9 +3,10 @@ import { z } from 'zod';
 // ✅ Verify OTP Request Schema (Zod)
 export const VerifyOtpRequestBodyDto = z
   .object({
-    email: z.string().email().optional(),
+    email: z.string().trim().email().optional(),
     phone: z
       .string()
+      .trim()
       .regex(/^\+\d{1,3}\d{10}$/)
       .optional(),
     otp: z.string().length(6, 'OTP must be exactly 6 digits'),
@@ -21,9 +22,10 @@ export type VerifyOtpRequestBodyDto = z.infer<typeof VerifyOtpRequestBodyDto>;
 // ✅ Verify OTP Request Schema (Zod)
 export const VerifyOtpPayloadDto = z
   .object({
-    email: z.string().email().optional(),
+    email: z.string().trim().email().optional(),
     phone: z
       .string()
+      .trim()
       .regex(/^\+\d{1,3}\d{10}$/)
       .optional(),
     otp: z.string().length(6, 'OTP must be exactly 6 digits'),
@@ -38,7 +40,7 @@ export type VerifyOtpPayloadDto = z.infer<typeof VerifyOtpPayloadDto>;
 
 // ✅ Verify OTP Response Schema (Zod)
 export const VerifyOtpResponseDto = z.object({
-  token: z.string(),
+  token: z.string().trim(),
 });
 
 // ✅ TypeScript Type Inference for Response DTO

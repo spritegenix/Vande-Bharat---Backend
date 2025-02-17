@@ -2,15 +2,15 @@ import { z } from 'zod';
 import { Page } from '../schema';
 
 // ✅ Signup Request Schema (Zod)
-export const MyPagesRequestDto = z.any();
+export const GetMyPagesRequestDto = z.any();
 
 // ✅ TypeScript Type Inference
-export type MyPagesRequestDto = z.infer<typeof MyPagesRequestDto>;
+export type GetMyPagesRequestDto = z.infer<typeof GetMyPagesRequestDto>;
 
 // ✅ Signup Response Schema (Zod)
-export const MyPagesResponseDto = z.lazy(() =>
+export const GetMyPagesResponseDto = z.lazy(() =>
   Page.array().nullable().optional(),
 );
 
 // ✅ TypeScript Type for Response
-export type MyPagesResponseDto = z.infer<typeof MyPagesResponseDto>;
+export type GetMyPagesResponseDto = z.infer<typeof GetMyPagesResponseDto>;

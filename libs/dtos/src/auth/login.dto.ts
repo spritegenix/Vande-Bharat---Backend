@@ -2,9 +2,10 @@ import { z } from 'zod';
 
 export const LoginRequestBodyDto = z
   .object({
-    email: z.string().email().optional(),
+    email: z.string().trim().email().optional(),
     phone: z
       .string()
+      .trim()
       .regex(/^\+\d{1,3}\d{10}$/)
       .optional(),
     password: z.string().min(6),
@@ -18,9 +19,10 @@ export type LoginRequestBodyDto = z.infer<typeof LoginRequestBodyDto>;
 
 export const LoginPayloadDto = z
   .object({
-    email: z.string().email().optional(),
+    email: z.string().trim().email().optional(),
     phone: z
       .string()
+      .trim()
       .regex(/^\+\d{1,3}\d{10}$/)
       .optional(),
     password: z.string().min(6),

@@ -6,7 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { ErrorUtil, FileUtil } from './utils';
 import { PageModule } from './page/page.module';
-import { LoggerModule } from '@app/logger';
+import { Logger, LoggerModule } from '@app/logger';
 import { LoggerMiddleware } from './logger/logger.middleware';
 
 @Module({
@@ -20,7 +20,7 @@ import { LoggerMiddleware } from './logger/logger.middleware';
     PageModule,
   ],
   controllers: [AppController],
-  providers: [AppService, ErrorUtil, FileUtil],
+  providers: [AppService, ErrorUtil, FileUtil, Logger],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
