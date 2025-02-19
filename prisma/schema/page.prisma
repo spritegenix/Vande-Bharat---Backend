@@ -11,6 +11,7 @@ model Page {
     isBlocked          Boolean     @default(false)
     isVerified         Boolean     @default(false)
     followerCount      Int?        @default(0)
+    followingCount     Int?        @default(0)
     postCount          Int?        @default(0)
     privacy            PagePrivacy @default(PUBLIC)
 
@@ -88,6 +89,7 @@ model PageHistory {
     isBlocked          Boolean?
     isVerified         Boolean?
     followerCount      Int?
+    followingCount     Int?
     postCount          Int?
     privacy            String?
 

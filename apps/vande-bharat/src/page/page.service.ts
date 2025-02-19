@@ -1,11 +1,23 @@
 import { PrismaService } from '@app/prisma';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ErrorUtil, FileUtil } from '../utils';
 import {
+  CreateFollowingRequestParamDto,
   CreatePageRequestBodyDto,
-  GetPageFollowerRequestParamDto,
-  UpdateFollowStatusRequestBodyDto,
-  UpdateFollowStatusRequestParamDto,
+  DeleteFollowersRequestParamDto,
+  DeleteFollowingRequestParamDto,
+  DeletePageRequestParamDto,
+  GetFollowersRequestParamDto,
+  GetFollowingRequestParamDto,
+  GetPageRequestParamDto,
+  UpdateFollowersRequestBodyDto,
+  UpdateFollowersRequestParamDto,
+  UpdateFollowingRequestParamDto,
   UpdatePageRequestBodyDto,
   UpdatePageRequestParamDto,
   ValidateHeaderResponseDto,
@@ -19,41 +31,77 @@ export class PageService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly errorUtil: ErrorUtil,
-    private slugUtil: SlugUtil,
-    private fileUtil: FileUtil,
+    private readonly slugUtil: SlugUtil,
+    private readonly fileUtil: FileUtil,
   ) {}
 
-  async getMyPages(user: ValidateHeaderResponseDto) {
+  async getPage(
+    user: ValidateHeaderResponseDto,
+    param: GetPageRequestParamDto,
+  ) {
     try {
-      const where: Prisma.PageWhereInput = {
-        ownerId: user.id,
-        deletedAt: null,
+      const pageExists = await this.pageExists(param.pageId);
+
+      if (!pageExists) throw new NotFoundException('Invalid page ID');
+
+      let where: Prisma.PageWhereInput;
+      let queryOptions: {
+        include?: Prisma.PageInclude;
+        select?: Prisma.PageSelect;
       };
-      const include: Prisma.PageInclude = {
-        categories: { where: { deletedAt: null } },
-        tags: { where: { deletedAt: null } },
-        addresses: { where: { deletedAt: null } },
-        notifications: { where: { deletedAt: null } },
-        followers: { where: { deletedAt: null } },
-        following: { where: { deletedAt: null } },
-        ownedGroups: { where: { deletedAt: null } },
-        joinedGroups: { where: { deletedAt: null } },
-        posts: { where: { deletedAt: null } },
-        comments: { where: { deletedAt: null } },
-        reactions: { where: { deletedAt: null } },
-        bookmarks: { where: { deletedAt: null } },
-        orders: { where: { deletedAt: null } },
-        products: { where: { deletedAt: null } },
-        cartItems: { where: { deletedAt: null } },
-        donated: { where: { deletedAt: null } },
-        donors: { where: { deletedAt: null } },
-        reports: { where: { deletedAt: null } },
-      };
-      const pages = await this.prisma.page.findMany({
-        where: where,
-        include: include,
+
+      if (pageExists.ownerId === user.id) {
+        where = { id: pageExists.id };
+        queryOptions = {
+          include: {
+            categories: { where: { deletedAt: null } },
+            tags: { where: { deletedAt: null } },
+            addresses: { where: { deletedAt: null } },
+            notifications: { where: { deletedAt: null } },
+            followers: { where: { deletedAt: null } },
+            following: { where: { deletedAt: null } },
+            ownedGroups: { where: { deletedAt: null } },
+            joinedGroups: { where: { deletedAt: null } },
+            posts: { where: { deletedAt: null } },
+            comments: { where: { deletedAt: null } },
+            reactions: { where: { deletedAt: null } },
+            bookmarks: { where: { deletedAt: null } },
+            orders: { where: { deletedAt: null } },
+            products: { where: { deletedAt: null } },
+            cartItems: { where: { deletedAt: null } },
+            donated: { where: { deletedAt: null } },
+            donors: { where: { deletedAt: null } },
+            reports: { where: { deletedAt: null } },
+          },
+        };
+      } else {
+        where = {
+          id: pageExists.id,
+          isHidden: false,
+          isBlocked: false,
+        };
+        queryOptions = {
+          select: {
+            id: true,
+            slug: true,
+            name: true,
+            description: true,
+            banner: true,
+            avatar: true,
+            pageContactDetails: true,
+            isVerified: true,
+            followerCount: true,
+            postCount: true,
+          },
+        };
+      }
+
+      const page = await this.prisma.page.findFirst({
+        where,
+        ...queryOptions,
       });
-      return pages;
+
+      return page;
     } catch (error) {
       this.errorUtil.handleError(error);
     }
@@ -116,21 +164,14 @@ export class PageService {
     },
   ) {
     try {
-      const pageExists = await this.prisma.page.findFirst({
-        where: {
-          OR: [
-            {
-              id: param.pageId,
-            },
-            {
-              slug: param.pageId,
-            },
-          ],
-          ownerId: user.id,
-        },
-      });
+      const pageExists = await this.pageExists(param.pageId);
 
-      if (!pageExists) throw new UnauthorizedException('Invalid page ID');
+      if (!pageExists) throw new NotFoundException('Invalid page ID');
+
+      if (pageExists.ownerId !== user.id)
+        throw new UnauthorizedException(
+          'You are not authorized to modify this page.',
+        );
 
       let banner = undefined;
 
@@ -195,69 +236,126 @@ export class PageService {
     }
   }
 
-  async getPageFollowers(
+  async deletePage(
     user: ValidateHeaderResponseDto,
-    param: GetPageFollowerRequestParamDto,
+    param: DeletePageRequestParamDto,
   ) {
     try {
-      const pageExists = await this.prisma.page.findFirst({
+      const pageExists = await this.pageExists(param.pageId);
+
+      if (!pageExists) throw new NotFoundException('Invalid page ID');
+
+      if (pageExists.ownerId !== user.id)
+        throw new UnauthorizedException(
+          'You are not authorized to modify this page.',
+        );
+
+      await this.prisma.page.update({
         where: {
-          OR: [
-            {
-              id: param.pageId,
-            },
-            {
-              slug: param.pageId,
-            },
-          ],
-          ownerId: user.id,
+          id: pageExists.id,
         },
-        include: {
-          followers: true,
+        data: {
+          deletedAt: new Date(),
         },
       });
 
-      if (!pageExists) throw new UnauthorizedException('Invalid page ID');
-
-      return pageExists.followers;
+      return {
+        message: 'Page deleted successfully',
+      };
     } catch (error) {
       this.errorUtil.handleError(error);
     }
   }
 
-  async updateFollowStatus(
+  async getFollowers(
     user: ValidateHeaderResponseDto,
-    param: UpdateFollowStatusRequestParamDto,
-    body: UpdateFollowStatusRequestBodyDto,
+    param: GetFollowersRequestParamDto,
   ) {
     try {
-      const pageExists = await this.prisma.page.findFirst({
-        where: {
-          OR: [
-            {
-              id: param.pageId,
-            },
-            {
-              slug: param.pageId,
-            },
-          ],
-          ownerId: user.id,
-        },
-      });
-      if (!pageExists) throw new UnauthorizedException('Invalid page ID');
+      const pageExists = await this.pageExists(param.pageId);
 
-      const followerExists = await this.prisma.pageFollower.findFirst({
-        where: {
-          followerId: param.followerId,
+      if (!pageExists) {
+        throw new NotFoundException('Invalid page ID');
+      }
+
+      let where: Prisma.PageFollowerWhereInput;
+      let queryOptions: {
+        include?: Prisma.PageFollowerInclude;
+        select?: Prisma.PageFollowerSelect;
+      };
+
+      if (pageExists.ownerId === user.id) {
+        where = {
           followingId: pageExists.id,
-        },
+          deletedAt: null,
+          followerId: param.followerId,
+        };
+        queryOptions = {
+          include: {
+            follower: {
+              select: {
+                id: true,
+                slug: true,
+                name: true,
+                avatar: true,
+              },
+            },
+          },
+        };
+      } else {
+        where = {
+          followingId: pageExists.id,
+          status: 'ACCEPTED',
+          deletedAt: null,
+          followerId: param.followerId,
+        };
+        queryOptions = {
+          select: {
+            id: true,
+            follower: {
+              select: {
+                id: true,
+                slug: true,
+                name: true,
+                avatar: true,
+              },
+            },
+          },
+        };
+      }
+
+      const followers = await this.prisma.pageFollower.findMany({
+        where,
+        ...queryOptions,
       });
-      if (!followerExists)
-        throw new UnauthorizedException('Invalid follower ID');
+
+      return followers;
+    } catch (error) {
+      this.errorUtil.handleError(error);
+    }
+  }
+
+  async updateFollowers(
+    user: ValidateHeaderResponseDto,
+    param: UpdateFollowersRequestParamDto,
+    body: UpdateFollowersRequestBodyDto,
+  ) {
+    try {
+      const pageExists = await this.pageExists(param.pageId);
+
+      if (!pageExists) throw new NotFoundException('Invalid page ID');
+
+      if (pageExists.ownerId !== user.id)
+        throw new UnauthorizedException(
+          'You are not authorized to modify this page.',
+        );
 
       const pageFollower = await this.prisma.pageFollower.update({
         where: {
-          id: followerExists.id,
+          followerId_followingId: {
+            followerId: param.followerId,
+            followingId: pageExists.id,
+          },
         },
         data: {
           status: body.status,
@@ -265,6 +363,239 @@ export class PageService {
       });
 
       return { ...pageFollower, message: 'Page follower updated successfully' };
+    } catch (error) {
+      this.errorUtil.handleError(error);
+    }
+  }
+
+  async deleteFollowers(
+    user: ValidateHeaderResponseDto,
+    param: DeleteFollowersRequestParamDto,
+  ) {
+    try {
+      const pageExists = await this.pageExists(param.pageId);
+
+      if (!pageExists) throw new NotFoundException('Invalid page ID');
+
+      if (pageExists.ownerId !== user.id)
+        throw new UnauthorizedException(
+          'You are not authorized to modify this page.',
+        );
+
+      await this.prisma.pageFollower.update({
+        where: {
+          followerId_followingId: {
+            followerId: param.followerId,
+            followingId: pageExists.id,
+          },
+        },
+        data: {
+          deletedAt: new Date(),
+        },
+      });
+
+      return {
+        message: 'Page follower deleted successfully',
+      };
+    } catch (error) {
+      this.errorUtil.handleError(error);
+    }
+  }
+
+  async getFollowing(
+    user: ValidateHeaderResponseDto,
+    param: GetFollowingRequestParamDto,
+  ) {
+    try {
+      const pageExists = await this.pageExists(param.pageId);
+
+      if (!pageExists) throw new NotFoundException('Invalid page ID');
+
+      let where: Prisma.PageFollowerWhereInput;
+      let queryOptions: {
+        include?: Prisma.PageFollowerInclude;
+        select?: Prisma.PageFollowerSelect;
+      };
+
+      if (pageExists.ownerId === user.id) {
+        where = {
+          followerId: pageExists.id,
+          deletedAt: null,
+          followingId: param.followingId,
+        };
+        queryOptions = {
+          include: {
+            following: {
+              select: {
+                id: true,
+                slug: true,
+                name: true,
+                avatar: true,
+              },
+            },
+          },
+        };
+      } else {
+        where = {
+          followingId: pageExists.id,
+          status: 'ACCEPTED',
+          deletedAt: null,
+          followerId: param.followingId,
+        };
+        queryOptions = {
+          select: {
+            id: true,
+            follower: {
+              select: {
+                id: true,
+                slug: true,
+                name: true,
+                avatar: true,
+              },
+            },
+          },
+        };
+      }
+
+      return await this.prisma.pageFollower.findFirst({
+        where,
+        ...queryOptions,
+      });
+    } catch (error) {
+      this.errorUtil.handleError(error);
+    }
+  }
+
+  async createFollowing(
+    user: ValidateHeaderResponseDto,
+    param: CreateFollowingRequestParamDto,
+  ) {
+    try {
+      const pageExists = await this.pageExists(param.pageId);
+
+      if (!pageExists) throw new NotFoundException('Invalid page ID');
+
+      if (pageExists.ownerId !== user.id)
+        throw new UnauthorizedException(
+          'You are not authorized to modify this page.',
+        );
+
+      const existing = await this.prisma.pageFollower.findUnique({
+        where: {
+          followerId_followingId: {
+            followerId: pageExists.id,
+            followingId: param.followingId,
+          },
+        },
+      });
+      if (existing?.status === 'ACCEPTED') {
+        throw new BadRequestException('Already following');
+      }
+
+      return await this.prisma.pageFollower.upsert({
+        where: {
+          id: existing?.id,
+        },
+        update: {
+          status: 'PENDING',
+        },
+        create: {
+          followerId: user.id,
+          followingId: pageExists.id,
+          status: 'PENDING',
+        },
+      });
+    } catch (error) {
+      this.errorUtil.handleError(error);
+    }
+  }
+
+  async updateFollowing(
+    user: ValidateHeaderResponseDto,
+    param: UpdateFollowingRequestParamDto,
+  ) {
+    try {
+      const pageExists = await this.pageExists(param.pageId);
+
+      if (!pageExists) throw new NotFoundException('Invalid page ID');
+
+      if (pageExists.ownerId !== user.id)
+        throw new UnauthorizedException(
+          'You are not authorized to modify this page.',
+        );
+
+      const existing = await this.prisma.pageFollower.findUnique({
+        where: {
+          followerId_followingId: {
+            followerId: pageExists.id,
+            followingId: param.followingId,
+          },
+        },
+      });
+      if (existing?.status === 'ACCEPTED') {
+        throw new BadRequestException('Already following');
+      }
+      return await this.prisma.pageFollower.upsert({
+        where: {
+          id: existing?.id,
+        },
+        update: {
+          status: 'PENDING',
+          deletedAt: null,
+        },
+        create: {
+          followerId: user.id,
+          followingId: pageExists.id,
+          status: 'PENDING',
+          deletedAt: null,
+        },
+      });
+    } catch (error) {
+      this.errorUtil.handleError(error);
+    }
+  }
+
+  async deleteFollowing(
+    user: ValidateHeaderResponseDto,
+    param: DeleteFollowingRequestParamDto,
+  ) {
+    try {
+      const pageExists = await this.pageExists(param.pageId);
+
+      if (!pageExists) throw new NotFoundException('Invalid page ID');
+
+      if (pageExists.ownerId !== user.id)
+        throw new UnauthorizedException(
+          'You are not authorized to modify this page.',
+        );
+
+      await this.prisma.pageFollower.update({
+        where: {
+          followerId_followingId: {
+            followerId: pageExists.id,
+            followingId: param.followingId,
+          },
+        },
+        data: {
+          deletedAt: new Date(),
+        },
+      });
+
+      return {
+        message: 'Page following deleted successfully',
+      };
+    } catch (error) {
+      this.errorUtil.handleError(error);
+    }
+  }
+
+  private async pageExists(id: string) {
+    try {
+      const page = await this.prisma.page.findFirst({
+        where: { OR: [{ id }, { slug: id }] },
+      });
+      if (!page) throw new NotFoundException('Page not found');
+      return page;
     } catch (error) {
       this.errorUtil.handleError(error);
     }

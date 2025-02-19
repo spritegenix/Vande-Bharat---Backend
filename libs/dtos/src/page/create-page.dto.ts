@@ -26,6 +26,12 @@ export const CreatePageRequestBodyDto = z.object({
 // ✅ TypeScript Type Inference
 export type CreatePageRequestBodyDto = z.infer<typeof CreatePageRequestBodyDto>;
 
+export const CreatePageRequestParamDto = z.any();
+
+export type CreatePageRequestParamDto = z.infer<
+  typeof CreatePageRequestParamDto
+>;
+
 // ✅ Signup Response Schema (Zod)
 export const CreatePageResponseDto = z.lazy(() =>
   Page.extend({

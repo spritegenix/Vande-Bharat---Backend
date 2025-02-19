@@ -1,0 +1,39 @@
+import { any, z } from 'zod';
+import { PageFollower } from '../schema';
+
+// ✅ Signup Request Schema (Zod)
+export const UpdateFollowingRequestBodyDto = any();
+
+// ✅ TypeScript Type Inference
+export type UpdateFollowingRequestBodyDto = z.infer<
+  typeof UpdateFollowingRequestBodyDto
+>;
+
+// ✅ Signup Request Schema (Zod)
+export const UpdateFollowingRequestParamDto = z.object({
+  pageId: z
+    .string()
+    .trim() // First trim to clean the string
+    .min(1, 'Page ID is required'), // Ensure it's not empty
+
+  followingId: z.string().trim().min(1, 'Page Follower ID is required'),
+});
+
+// ✅ TypeScript Type Inference
+export type UpdateFollowingRequestParamDto = z.infer<
+  typeof UpdateFollowingRequestParamDto
+>;
+
+// ✅ Signup Response Schema (Zod)
+export const UpdateFollowingResponseDto = z.lazy(() =>
+  PageFollower.extend({
+    message: z.string().nullable().optional(),
+  })
+    .nullable()
+    .optional(),
+);
+
+// ✅ TypeScript Type for Response
+export type UpdateFollowingResponseDto = z.infer<
+  typeof UpdateFollowingResponseDto
+>;

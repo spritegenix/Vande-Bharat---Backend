@@ -35,6 +35,7 @@ export const Page = z
     isBlocked: z.boolean().nullable().optional(),
     isVerified: z.boolean().nullable().optional(),
     followerCount: z.number().nullable().optional(),
+    followingCount: z.number().nullable().optional(),
     postCount: z.number().nullable().optional(),
     privacy: PagePrivacy.nullable().optional(),
 
@@ -182,6 +183,7 @@ export const PageHistory = z.object({
   isBlocked: z.boolean().nullable().optional(),
   isVerified: z.boolean().nullable().optional(),
   followerCount: z.number().nullable().optional(),
+  followingCount: z.number().nullable().optional(),
   postCount: z.number().nullable().optional(),
   privacy: z.string().nullable().optional(),
 

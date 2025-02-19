@@ -28,13 +28,7 @@ export type UpdatePageRequestBodyDto = z.infer<typeof UpdatePageRequestBodyDto>;
 
 // ✅ Signup Request Schema (Zod)
 export const UpdatePageRequestParamDto = z.object({
-  pageId: z
-    .string()
-    .trim()
-    .min(1, 'Page Follower ID is required')
-    .refine((val) => /^[a-fA-F0-9-]+$/.test(val), {
-      message: 'Invalid Page Follower ID format',
-    }),
+  pageId: z.string().trim().min(1, 'Page Follower ID is required'),
 });
 
 // ✅ TypeScript Type Inference

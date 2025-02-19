@@ -3,7 +3,7 @@ import { PageFollower } from '../schema';
 import { FollowStatus } from '@prisma/client';
 
 // ✅ Signup Request Schema (Zod)
-export const UpdateFollowStatusRequestBodyDto = z.object({
+export const UpdateFollowersRequestBodyDto = z.object({
   status: z
     .string() // Ensures input is a string
     .transform((val) => FollowStatus[val as keyof typeof FollowStatus])
@@ -16,12 +16,12 @@ export const UpdateFollowStatusRequestBodyDto = z.object({
 });
 
 // ✅ TypeScript Type Inference
-export type UpdateFollowStatusRequestBodyDto = z.infer<
-  typeof UpdateFollowStatusRequestBodyDto
+export type UpdateFollowersRequestBodyDto = z.infer<
+  typeof UpdateFollowersRequestBodyDto
 >;
 
 // ✅ Signup Request Schema (Zod)
-export const UpdateFollowStatusRequestParamDto = z.object({
+export const UpdateFollowersRequestParamDto = z.object({
   pageId: z
     .string()
     .trim() // First trim to clean the string
@@ -31,12 +31,12 @@ export const UpdateFollowStatusRequestParamDto = z.object({
 });
 
 // ✅ TypeScript Type Inference
-export type UpdateFollowStatusRequestParamDto = z.infer<
-  typeof UpdateFollowStatusRequestParamDto
+export type UpdateFollowersRequestParamDto = z.infer<
+  typeof UpdateFollowersRequestParamDto
 >;
 
 // ✅ Signup Response Schema (Zod)
-export const UpdateFollowStatusResponseDto = z.lazy(() =>
+export const UpdateFollowersResponseDto = z.lazy(() =>
   PageFollower.extend({
     message: z.string().nullable().optional(),
   })
@@ -45,6 +45,6 @@ export const UpdateFollowStatusResponseDto = z.lazy(() =>
 );
 
 // ✅ TypeScript Type for Response
-export type UpdateFollowStatusResponseDto = z.infer<
-  typeof UpdateFollowStatusResponseDto
+export type UpdateFollowersResponseDto = z.infer<
+  typeof UpdateFollowersResponseDto
 >;
