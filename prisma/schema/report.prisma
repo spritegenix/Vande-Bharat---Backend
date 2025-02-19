@@ -1,73 +1,77 @@
 model Report {
-    id      String  @id @default(uuid())
-    message String?
+  id      String  @id @default(uuid())
+  message String?
 
-    createdAt DateTime  @default(now())
-    updatedAt DateTime  @updatedAt
-    deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
-    type          ReportType?     @relation(fields: [reportTypeId], references: [id])
-    reportTypeId  String?
-    user          User?           @relation(fields: [userId], references: [id])
-    userId        String?
-    page          Page?           @relation(fields: [pageId], references: [id])
-    pageId        String?
-    group         Group?          @relation(fields: [groupId], references: [id])
-    groupId       String?
-    post          Post?           @relation(fields: [postId], references: [id])
-    postId        String?
-    comment       Comment?        @relation(fields: [commentId], references: [id])
-    commentId     String?
-    reportHistory ReportHistory[]
+  comment      Comment?    @relation(fields: [commentId], references: [id])
+  commentId    String?
+  group        Group?      @relation(fields: [groupId], references: [id])
+  groupId      String?
+  page         Page?       @relation(fields: [pageId], references: [id])
+  pageId       String?
+  post         Post?       @relation(fields: [postId], references: [id])
+  postId       String?
+  user         User?       @relation(fields: [userId], references: [id])
+  userId       String?
+  type         ReportType? @relation(fields: [reportTypeId], references: [id])
+  reportTypeId String?
 
-    @@map("reports")
+  reportHistory ReportHistory[]
+
+  @@map("reports")
 }
 
 model ReportType {
-    id   String @id @default(uuid())
-    name String
+  id          String  @id @default(uuid())
+  name        String
+  description String?
 
-    createdAt DateTime  @default(now())
-    updatedAt DateTime  @updatedAt
-    deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
-    reports           Report[]
-    reportTypeHistory ReportTypeHistory[]
+  reports Report[]
 
-    @@map("reportTypes")
+  reportTypeHistory ReportTypeHistory[]
+
+  @@map("report_types")
 }
 
 model ReportHistory {
-    id       String  @id @default(uuid()) // Unique ID for historical records
-    reportId String // Reference to the original report
-    message  String?
+  id       String  @id @default(uuid())
+  reportId String
+  message  String?
 
-    createdAt DateTime?
-    updatedAt DateTime?
-    deletedAt DateTime?
+  createdAt DateTime?
+  updatedAt DateTime?
+  deletedAt DateTime?
 
-    reportTypeId String?
-    userId       String?
-    pageId       String?
-    groupId      String?
-    postId       String?
-    commentId    String?
+  commentId    String?
+  groupId      String?
+  pageId       String?
+  postId       String?
+  userId       String?
+  reportTypeId String?
 
-    report Report @relation(fields: [reportId], references: [id])
+  report Report @relation(fields: [reportId], references: [id])
 
-    @@map("report_histories")
+  @@map("report_histories")
 }
 
 model ReportTypeHistory {
-    id           String  @id @default(uuid())
-    reportTypeId String
-    name         String?
+  id           String  @id @default(uuid())
+  reportTypeId String
+  name         String?
+  description  String?
 
-    createdAt DateTime?
-    updatedAt DateTime?
-    deletedAt DateTime?
+  createdAt DateTime?
+  updatedAt DateTime?
+  deletedAt DateTime?
 
-    reportTypes ReportType @relation(fields: [reportTypeId], references: [id])
+  reportTypes ReportType @relation(fields: [reportTypeId], references: [id])
 
-    @@map("report_types_histories")
+  @@map("report_type_histories")
 }

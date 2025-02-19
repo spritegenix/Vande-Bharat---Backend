@@ -27,7 +27,7 @@ export const UpdateFollowStatusRequestParamDto = z.object({
     .trim() // First trim to clean the string
     .min(1, 'Page ID is required'), // Ensure it's not empty
 
-  pageFollowerId: z.string().trim().min(1, 'Page Follower ID is required'),
+  followerId: z.string().trim().min(1, 'Page Follower ID is required'),
 });
 
 // ✅ TypeScript Type Inference

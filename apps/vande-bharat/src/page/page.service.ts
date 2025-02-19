@@ -12,6 +12,7 @@ import {
 } from '@app/dtos';
 import { SlugUtil } from './utils';
 import * as uuid from 'uuid';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PageService {
@@ -24,11 +25,33 @@ export class PageService {
 
   async getMyPages(user: ValidateHeaderResponseDto) {
     try {
+      const where: Prisma.PageWhereInput = {
+        ownerId: user.id,
+        deletedAt: null,
+      };
+      const include: Prisma.PageInclude = {
+        categories: { where: { deletedAt: null } },
+        tags: { where: { deletedAt: null } },
+        addresses: { where: { deletedAt: null } },
+        notifications: { where: { deletedAt: null } },
+        followers: { where: { deletedAt: null } },
+        following: { where: { deletedAt: null } },
+        ownedGroups: { where: { deletedAt: null } },
+        joinedGroups: { where: { deletedAt: null } },
+        posts: { where: { deletedAt: null } },
+        comments: { where: { deletedAt: null } },
+        reactions: { where: { deletedAt: null } },
+        bookmarks: { where: { deletedAt: null } },
+        orders: { where: { deletedAt: null } },
+        products: { where: { deletedAt: null } },
+        cartItems: { where: { deletedAt: null } },
+        donated: { where: { deletedAt: null } },
+        donors: { where: { deletedAt: null } },
+        reports: { where: { deletedAt: null } },
+      };
       const pages = await this.prisma.page.findMany({
-        where: {
-          ownerId: user.id,
-          deletedAt: null,
-        },
+        where: where,
+        include: include,
       });
       return pages;
     } catch (error) {
@@ -189,27 +212,14 @@ export class PageService {
           ],
           ownerId: user.id,
         },
+        include: {
+          followers: true,
+        },
       });
 
       if (!pageExists) throw new UnauthorizedException('Invalid page ID');
 
-      const followers = await this.prisma.pageFollower.findMany({
-        where: {
-          pageId: pageExists.id,
-          deletedAt: null,
-        },
-        include: {
-          user: {
-            select: {
-              id: true,
-              slug: true,
-              name: true,
-              avatar: true,
-            },
-          },
-        },
-      });
-      return followers;
+      return pageExists.followers;
     } catch (error) {
       this.errorUtil.handleError(error);
     }
@@ -236,10 +246,18 @@ export class PageService {
       });
       if (!pageExists) throw new UnauthorizedException('Invalid page ID');
 
+      const followerExists = await this.prisma.pageFollower.findFirst({
+        where: {
+          followerId: param.followerId,
+          followingId: pageExists.id,
+        },
+      });
+      if (!followerExists)
+        throw new UnauthorizedException('Invalid follower ID');
+
       const pageFollower = await this.prisma.pageFollower.update({
         where: {
-          id: param.pageFollowerId,
-          pageId: pageExists.id,
+          id: followerExists.id,
         },
         data: {
           status: body.status,

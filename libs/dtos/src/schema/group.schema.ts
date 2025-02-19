@@ -1,10 +1,10 @@
 import { z } from 'zod';
-import { User } from './user.schema';
 import { Category } from './category.schema';
 import { Post } from './post.schema';
 import { Tag } from './tags.schema';
 import { Address } from './address.schema';
 import { Report } from './report.schema';
+import { Page } from './page.schema';
 
 // Define Enums Separately
 export const GroupPrivacy = z.enum(['PRIVATE', 'PUBLIC']).nullable().optional();
@@ -24,48 +24,47 @@ export const Group = z
     name: z.string().nullable().optional(),
     description: z.any().nullable().optional(), // JSON field
     privacy: GroupPrivacy.nullable().optional(),
-    isVerified: z.boolean().nullable().optional(),
+    banner: z.string().nullable().optional(),
     isHidden: z.boolean().nullable().optional(),
     isBlocked: z.boolean().nullable().optional(),
-    banner: z.string().nullable().optional(),
+    isVerified: z.boolean().nullable().optional(),
+    membersCount: z.number().nullable().optional(),
 
     createdAt: z.date().nullable().optional(),
     updatedAt: z.date().nullable().optional(),
     deletedAt: z.date().nullable().optional(),
 
-    membersCount: z.number().nullable().optional(),
-
     owner: z
-      .lazy(() => User.nullable().optional())
+      .lazy(() => Page.nullable().optional())
       .nullable()
       .optional(),
     ownerId: z.string().nullable().optional(),
+    addresses: z
+      .lazy(() => Address.array().nullable().optional())
+      .nullable()
+      .optional(),
+    members: z
+      .lazy(() => GroupMember.array().nullable().optional())
+      .nullable()
+      .optional(),
     category: z
       .lazy(() => Category.nullable().optional())
       .nullable()
       .optional(),
     categoryId: z.string().nullable().optional(),
-
-    members: z
-      .lazy(() => GroupMember.array().nullable().optional())
-      .nullable()
-      .optional(),
     posts: z
       .lazy(() => Post.array().nullable().optional())
-      .nullable()
-      .optional(),
-    tags: z
-      .lazy(() => Tag.array().nullable().optional())
       .nullable()
       .optional(),
     reports: z
       .lazy(() => Report.array().nullable().optional())
       .nullable()
       .optional(),
-    addresses: z
-      .lazy(() => Address.array().nullable().optional())
+    tags: z
+      .lazy(() => Tag.array().nullable().optional())
       .nullable()
       .optional(),
+
     groupHistory: z
       .lazy(() => GroupHistory.array().nullable().optional())
       .nullable()
@@ -85,16 +84,16 @@ export const GroupMember = z
     updatedAt: z.date().nullable().optional(),
     deletedAt: z.date().nullable().optional(),
 
-    userId: z.string().nullable().optional(),
-    user: z
-      .lazy(() => User.nullable().optional())
-      .nullable()
-      .optional(),
-    groupId: z.string().nullable().optional(),
     group: z
       .lazy(() => Group.nullable().optional())
       .nullable()
       .optional(),
+    groupId: z.string().nullable().optional(),
+    member: z
+      .lazy(() => Page.nullable().optional())
+      .nullable()
+      .optional(),
+    memberId: z.string().nullable().optional(),
 
     groupMemberHistory: z
       .lazy(() => GroupMemberHistory.array().nullable().optional())
@@ -112,17 +111,16 @@ export const GroupHistory = z.object({
   slug: z.string().nullable().optional(),
   name: z.string().nullable().optional(),
   description: z.any().nullable().optional(), // JSON field
-  privacy: GroupPrivacy.nullable().optional(),
-  isVerified: z.boolean().nullable().optional(),
+  privacy: z.string().nullable().optional(),
+  banner: z.string().nullable().optional(),
   isHidden: z.boolean().nullable().optional(),
   isBlocked: z.boolean().nullable().optional(),
-  banner: z.string().nullable().optional(),
+  isVerified: z.boolean().nullable().optional(),
+  membersCount: z.number().nullable().optional(),
 
   createdAt: z.date().nullable().optional(),
   updatedAt: z.date().nullable().optional(),
   deletedAt: z.date().nullable().optional(),
-
-  membersCount: z.number().nullable().optional(),
 
   ownerId: z.string().nullable().optional(),
   categoryId: z.string().nullable().optional(),
@@ -137,14 +135,14 @@ export const GroupHistory = z.object({
 export const GroupMemberHistory = z.object({
   id: z.string().nullable().optional(),
   groupMemberId: z.string().nullable().optional(),
-  status: MemberStatus.nullable().optional(),
+  status: z.string().nullable().optional(),
 
   createdAt: z.date().nullable().optional(),
   updatedAt: z.date().nullable().optional(),
   deletedAt: z.date().nullable().optional(),
 
-  userId: z.string().nullable().optional(),
   groupId: z.string().nullable().optional(),
+  memberId: z.string().nullable().optional(),
 
   groupMember: z
     .lazy(() => GroupMember.nullable().optional())

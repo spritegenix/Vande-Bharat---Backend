@@ -18,22 +18,24 @@ export const Address = z
     updatedAt: z.date().nullable().optional(),
     deletedAt: z.date().nullable().optional(),
 
-    pageId: z.string().nullable().optional(),
+    group: z
+      .lazy(() => Group.nullable().optional())
+      .nullable()
+      .optional(),
     groupId: z.string().nullable().optional(),
-    postId: z.string().nullable().optional(),
 
     page: z
       .lazy(() => Page.nullable().optional())
       .nullable()
       .optional(),
-    group: z
-      .lazy(() => Group.nullable().optional())
-      .nullable()
-      .optional(),
+    pageId: z.string().nullable().optional(),
+
     post: z
       .lazy(() => Post.nullable().optional())
       .nullable()
       .optional(),
+    postId: z.string().nullable().optional(),
+
     addressHistory: z
       .lazy(() => AddressHistory.array().nullable().optional())
       .nullable()

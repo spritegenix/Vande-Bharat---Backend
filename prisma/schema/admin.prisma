@@ -1,70 +1,70 @@
 model Admin {
-    id     String  @id @default(uuid())
-    email  String  @unique
-    name   String
-    avatar String?
-    hash   String
+  id     String  @id @default(uuid())
+  email  String  @unique
+  name   String
+  avatar String?
+  hash   String
 
-    createdAt DateTime  @default(now())
-    updatedAt DateTime  @updatedAt
-    deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
-    role         AdminRole      @relation(fields: [adminRoleId], references: [id])
-    adminRoleId  String
-    adminHistory AdminHistory[]
+  role        AdminRole @relation(fields: [adminRoleId], references: [id])
+  adminRoleId String
 
-    @@map("admins")
+  adminHistory AdminHistory[]
+
+  @@map("admins")
 }
 
 model AdminRole {
-    id          String @id @default(uuid())
-    name        String
-    permissions Json
+  id          String @id @default(uuid())
+  name        String
+  permissions Json
 
-    createdAt DateTime  @default(now())
-    updatedAt DateTime  @updatedAt
-    deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
-    admins           Admin[]
-    adminRoleHistory AdminRoleHistory[]
+  admins Admin[]
 
-    @@map("admin_roles")
+  adminRoleHistory AdminRoleHistory[]
+
+  @@map("admin_roles")
 }
 
-// Historical table for Admins 
 model AdminHistory {
-    id      String  @id @default(uuid()) // Unique ID for historical records
-    adminId String // Foreign key to Admin
-    email   String?
-    name    String?
-    avatar  String?
-    hash    String
+  id      String  @id @default(uuid())
+  adminId String
+  email   String?
+  name    String?
+  avatar  String?
+  hash    String?
 
-    createdAt DateTime?
-    updatedAt DateTime?
-    deletedAt DateTime? // Soft deletion for history
+  createdAt DateTime?
+  updatedAt DateTime?
+  deletedAt DateTime?
 
-    // Foreign key relationship with Admin
-    admin Admin @relation(fields: [adminId], references: [id])
+  adminRoleId String?
 
-    @@index([adminId])
-    @@map("admin_histories")
+  admin Admin @relation(fields: [adminId], references: [id])
+
+  @@index([adminId])
+  @@map("admin_histories")
 }
 
-// Historical table for Admin Roles (to track versioning)
 model AdminRoleHistory {
-    id          String  @id @default(uuid()) // Unique ID for historical records
-    adminRoleId String // Foreign key to AdminRole
-    name        String?
-    permissions Json?
+  id          String  @id @default(uuid())
+  adminRoleId String
+  name        String?
+  permissions Json?
 
-    createdAt DateTime?
-    updatedAt DateTime?
-    deletedAt DateTime? // Soft deletion for history
+  createdAt DateTime?
+  updatedAt DateTime?
+  deletedAt DateTime?
 
-    // Foreign key relationship with AdminRole
-    adminRole AdminRole @relation(fields: [adminRoleId], references: [id])
+  adminRole AdminRole @relation(fields: [adminRoleId], references: [id])
 
-    @@index([adminRoleId])
-    @@map("admin_role_histories")
+  @@index([adminRoleId])
+  @@map("admin_role_histories")
 }

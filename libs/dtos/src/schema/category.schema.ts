@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { Page } from './page.schema';
 import { Group } from './group.schema';
-import { Product } from './ecommerce.schema';
+import { Product } from './e-commerce.schema';
 
 // Category Schema
 export const Category = z
@@ -16,24 +16,25 @@ export const Category = z
     updatedAt: z.date().nullable().optional(),
     deletedAt: z.date().nullable().optional(),
 
-    parentId: z.string().nullable().optional(),
     parent: z
       .lazy(() => Category.nullable().optional())
       .nullable()
       .optional(),
-
+    parentId: z.string().nullable().optional(),
     children: z
       .lazy(() => Category.array().nullable().optional())
+      .nullable()
+      .optional(),
+
+    groups: z
+      .lazy(() => Group.array().nullable().optional())
       .nullable()
       .optional(),
     pages: z
       .lazy(() => Page.array().nullable().optional())
       .nullable()
       .optional(),
-    groups: z
-      .lazy(() => Group.array().nullable().optional())
-      .nullable()
-      .optional(),
+
     categoryHistory: z
       .lazy(() => CategoryHistory.array().nullable().optional())
       .nullable()
@@ -58,20 +59,21 @@ export const ProductCategory = z
     updatedAt: z.date().nullable().optional(),
     deletedAt: z.date().nullable().optional(),
 
-    parentId: z.string().nullable().optional(),
     parent: z
       .lazy(() => ProductCategory.nullable().optional())
       .nullable()
       .optional(),
-
+    parentId: z.string().nullable().optional(),
     children: z
       .lazy(() => ProductCategory.array().nullable().optional())
       .nullable()
       .optional(),
+
     products: z
       .lazy(() => Product.array().nullable().optional())
       .nullable()
       .optional(),
+
     productCategoryHistory: z
       .lazy(() => ProductCategoryHistory.array().nullable().optional())
       .nullable()

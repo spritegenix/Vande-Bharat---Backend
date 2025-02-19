@@ -1,11 +1,6 @@
 import { z } from 'zod';
-import { Comment, Reaction, Bookmark } from './post.schema';
-import { Notification } from './notification.schema';
 import { Report } from './report.schema';
-import { Group, GroupMember } from './group.schema';
-import { Page, PageFollower } from './page.schema';
-import { Order, CartItem } from './ecommerce.schema';
-import { Donation } from './donation.schema';
+import { Page } from './page.schema';
 
 // Define Enums Separately
 export const CredentialType = z.enum(['EMAIL', 'PHONE']).nullable().optional();
@@ -15,77 +10,35 @@ export type CredentialType = z.infer<typeof CredentialType>;
 export const User = z
   .object({
     id: z.string().nullable().optional(),
-    slug: z.string().nullable().optional(),
-    name: z.string().nullable().optional(),
-    avatar: z.string().nullable().optional(),
     hash: z.string().nullable().optional(),
-    isVerified: z.boolean().nullable().optional(),
     isHidden: z.boolean().nullable().optional(),
     isBlocked: z.boolean().nullable().optional(),
+    isVerified: z.boolean().nullable().optional(),
+    avatar: z.string().nullable().optional(),
+    name: z.string().nullable().optional(),
+    slug: z.string().nullable().optional(),
 
     createdAt: z.date().nullable().optional(),
     updatedAt: z.date().nullable().optional(),
     deletedAt: z.date().nullable().optional(),
 
-    followingPagesCount: z.number().nullable().optional(),
-    joinedGroupsCount: z.number().nullable().optional(),
-
-    ipAddresses: z
-      .lazy(() => IpAddress.array().nullable().optional())
-      .nullable()
-      .optional(),
     credentials: z
       .lazy(() => Credential.array().nullable().optional())
       .nullable()
       .optional(),
-    comments: z
-      .lazy(() => Comment.array().nullable().optional())
+    ipAddresses: z
+      .lazy(() => IpAddress.array().nullable().optional())
       .nullable()
       .optional(),
-    reactions: z
-      .lazy(() => Reaction.array().nullable().optional())
-      .nullable()
-      .optional(),
-    ownedGroups: z
-      .lazy(() => Group.array().nullable().optional())
-      .nullable()
-      .optional(),
-    joinedGroups: z
-      .lazy(() => GroupMember.array().nullable().optional())
-      .nullable()
-      .optional(),
-    ownedPages: z
+    pages: z
       .lazy(() => Page.array().nullable().optional())
-      .nullable()
-      .optional(),
-    followingPages: z
-      .lazy(() => PageFollower.array().nullable().optional())
-      .nullable()
-      .optional(),
-    orders: z
-      .lazy(() => Order.array().nullable().optional())
-      .nullable()
-      .optional(),
-    cartItems: z
-      .lazy(() => CartItem.array().nullable().optional())
-      .nullable()
-      .optional(),
-    donations: z
-      .lazy(() => Donation.array().nullable().optional())
-      .nullable()
-      .optional(),
-    bookmarks: z
-      .lazy(() => Bookmark.array().nullable().optional())
       .nullable()
       .optional(),
     reports: z
       .lazy(() => Report.array().nullable().optional())
       .nullable()
       .optional(),
-    notifications: z
-      .lazy(() => Notification.array().nullable().optional())
-      .nullable()
-      .optional(),
+
     userHistory: z
       .lazy(() => UserHistory.array().nullable().optional())
       .nullable()
@@ -113,6 +66,7 @@ export const IpAddress = z
       .lazy(() => User.nullable().optional())
       .nullable()
       .optional(),
+
     ipAddressHistory: z
       .lazy(() => IpAddressHistory.array().nullable().optional())
       .nullable()
@@ -157,16 +111,13 @@ export const Credential = z
 export const UserHistory = z.object({
   id: z.string().nullable().optional(),
   userId: z.string().nullable().optional(),
-  slug: z.string().nullable().optional(),
-  name: z.string().nullable().optional(),
-  avatar: z.string().nullable().optional(),
   hash: z.string().nullable().optional(),
-  isVerified: z.boolean().nullable().optional(),
   isHidden: z.boolean().nullable().optional(),
   isBlocked: z.boolean().nullable().optional(),
-
-  followingPagesCount: z.number().nullable().optional(),
-  joinedGroupsCount: z.number().nullable().optional(),
+  isVerified: z.boolean().nullable().optional(),
+  avatar: z.string().nullable().optional(),
+  name: z.string().nullable().optional(),
+  slug: z.string().nullable().optional(),
 
   createdAt: z.date().nullable().optional(),
   updatedAt: z.date().nullable().optional(),

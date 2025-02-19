@@ -1,177 +1,181 @@
-// E-commerce related models
 model Product {
-    id              String    @id @default(uuid())
-    name            String
-    description     String?
-    price           Decimal   @db.Decimal(10, 2)
-    discountedPrice Decimal?  @db.Decimal(10, 2)
-    banners         Json? // Array of image URLs with priority
-    specifications  Json? // Flexible JSON for product specs
-    links           Json? // Array of related links
-    createdAt       DateTime  @default(now())
-    updatedAt       DateTime  @updatedAt
-    deletedAt       DateTime?
+  id              String   @id @default(uuid())
+  name            String
+  description     String?
+  price           Decimal  @db.Decimal(10, 2)
+  discountedPrice Decimal? @db.Decimal(10, 2)
+  banners         Json?
+  specifications  Json?
+  links           Json?
 
-    pageId     String
-    page       Page            @relation(fields: [pageId], references: [id])
-    categoryId String
-    category   ProductCategory @relation(fields: [categoryId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
-    cartItems      CartItem[]
-    orderItems     OrderItem[]
-    tags           Tag[]
-    productHistory ProductHistory[]
+  category   ProductCategory @relation(fields: [categoryId], references: [id])
+  categoryId String
+  seller     Page            @relation(fields: [sellerId], references: [id])
+  sellerId   String
+  tags       Tag[]
 
-    @@index([pageId])
-    @@index([categoryId])
-    @@map("products")
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+
+  productHistory ProductHistory[]
+
+  @@index([sellerId])
+  @@index([categoryId])
+  @@map("products")
 }
 
 model CartItem {
-    id       String @id @default(uuid())
-    quantity Int
+  id       String @id @default(uuid())
+  quantity Int
 
-    createdAt DateTime  @default(now())
-    updatedAt DateTime  @updatedAt
-    deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
-    userId          String
-    user            User              @relation(fields: [userId], references: [id])
-    productId       String
-    product         Product           @relation(fields: [productId], references: [id])
-    cartItemHistory CartItemHistory[]
+  sellerId  String // Seller's page ID
+  product   Product @relation(fields: [productId], references: [id])
+  productId String // Product added to the cart
+  buyerPage Page    @relation(fields: [buyerId], references: [id]) // Buyer’s page related to the cart
+  buyerId   String // Buyer’s page ID
 
-    @@unique([userId, productId])
-    @@index([userId])
-    @@index([productId])
-    @@map("cart_items")
+  cartItemHistory CartItemHistory[]
+
+  @@unique([buyerId, sellerId, productId]) // Ensure each product appears only once in a seller's cart
+  @@index([buyerId]) // Index for efficient lookup by seller
+  @@index([productId]) // Index for efficient lookup by product
+  @@map("cart_items")
 }
 
 model Order {
-    id          String      @id @default(uuid())
-    status      OrderStatus @default(PENDING)
-    totalAmount Decimal     @db.Decimal(10, 2)
-    razorpayId  String?     @unique
-    createdAt   DateTime    @default(now())
-    updatedAt   DateTime    @updatedAt
-    deletedAt   DateTime?
+  id          String      @id @default(uuid())
+  status      OrderStatus @default(PENDING)
+  totalAmount Decimal     @db.Decimal(10, 2)
+  razorpayId  String?     @unique
 
-    userId String
-    user   User   @relation(fields: [userId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
-    orderItems   OrderItem[]
-    orderHistory OrderHistory[]
+  orderItems OrderItem[]
+  buyerPage  Page        @relation(fields: [buyerId], references: [id]) // Link order to seller's page
+  buyerId    String // Seller's page associated with the order
 
-    @@index([userId])
-    @@map("orders")
+  orderHistory OrderHistory[]
+
+  @@index([buyerId]) // Efficient lookup for orders by page (seller)
+  @@map("orders")
 }
 
 model OrderItem {
-    id       String  @id @default(uuid())
-    quantity Int
-    price    Decimal @db.Decimal(10, 2)
+  id       String  @id @default(uuid())
+  quantity Int
+  price    Decimal @db.Decimal(10, 2)
 
-    createdAt DateTime  @default(now())
-    updatedAt DateTime  @updatedAt
-    deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
-    orderId          String
-    order            Order              @relation(fields: [orderId], references: [id])
-    productId        String
-    product          Product            @relation(fields: [productId], references: [id])
-    orderItemHistory OrderItemHistory[]
+  order     Order   @relation(fields: [orderId], references: [id])
+  orderId   String
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
 
-    @@index([orderId])
-    @@index([productId])
-    @@map("order_items")
+  orderItemHistory OrderItemHistory[]
+
+  @@index([orderId])
+  @@index([productId])
+  @@map("order_items")
+}
+
+model ProductHistory {
+  id              String   @id @default(uuid())
+  productId       String
+  name            String?
+  description     String?
+  price           Decimal?
+  discountedPrice Decimal?
+  banners         Json?
+  specifications  Json?
+  links           Json?
+
+  createdAt DateTime?
+  updatedAt DateTime?
+  deletedAt DateTime?
+
+  categoryId String?
+  sellerId   String?
+
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([productId])
+  @@map("product_histories")
+}
+
+model CartItemHistory {
+  id         String @id @default(uuid())
+  cartItemId String
+  quantity   Int?
+
+  createdAt DateTime?
+  updatedAt DateTime?
+  deletedAt DateTime?
+
+  sellerId  String?
+  productId String?
+  buyerId   String?
+
+  cartItem CartItem @relation(fields: [cartItemId], references: [id])
+
+  @@index([cartItemId])
+  @@map("cart_item_histories")
+}
+
+model OrderHistory {
+  id          String   @id @default(uuid())
+  orderId     String
+  status      String?
+  totalAmount Decimal?
+  razorpayId  String?
+
+  createdAt DateTime?
+  updatedAt DateTime?
+  deletedAt DateTime?
+
+  buyerId String?
+
+  order Order @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+  @@map("order_histories")
+}
+
+model OrderItemHistory {
+  id          String   @id @default(uuid())
+  orderItemId String
+  quantity    Int?
+  price       Decimal?
+
+  createdAt DateTime?
+  updatedAt DateTime?
+  deletedAt DateTime?
+
+  orderId   String?
+  productId String?
+
+  orderItem OrderItem @relation(fields: [orderItemId], references: [id])
+
+  @@index([orderItemId])
+  @@map("order_item_histories")
 }
 
 enum OrderStatus {
-    PENDING
-    PAID
-    SHIPPED
-    DELIVERED
-    CANCELLED
-}
-
-// History table for Product (tracks changes over time)
-model ProductHistory {
-    id              String    @id @default(uuid())
-    productId       String // Foreign key to Product
-    name            String?
-    description     String?
-    price           Decimal?
-    discountedPrice Decimal?
-    banners         Json?
-    specifications  Json?
-    links           Json?
-    createdAt       DateTime?
-    updatedAt       DateTime?
-    deletedAt       DateTime? // Soft deletion for history
-
-    pageId     String?
-    categoryId String?
-
-    product Product @relation(fields: [productId], references: [id])
-
-    @@index([productId])
-    @@map("product_histories")
-}
-
-// History table for CartItem (tracks changes over time)
-model CartItemHistory {
-    id         String @id @default(uuid())
-    cartItemId String // Foreign key to CartItem
-    quantity   Int?
-
-    createdAt DateTime?
-    updatedAt DateTime?
-    deletedAt DateTime? // Soft deletion for history
-
-    userId    String?
-    productId String?
-
-    cartItem CartItem @relation(fields: [cartItemId], references: [id])
-
-    @@index([cartItemId])
-    @@map("cart_item_histories")
-}
-
-// History table for Order (tracks changes over time)
-model OrderHistory {
-    id          String    @id @default(uuid())
-    orderId     String // Foreign key to Order
-    status      String?
-    totalAmount Decimal?
-    razorpayId  String?
-    createdAt   DateTime?
-    updatedAt   DateTime?
-    deletedAt   DateTime? // Soft deletion for history
-
-    userId String?
-
-    order Order @relation(fields: [orderId], references: [id])
-
-    @@index([orderId])
-    @@map("order_histories")
-}
-
-// History table for OrderItem (tracks changes over time)
-model OrderItemHistory {
-    id          String   @id @default(uuid())
-    orderItemId String // Foreign key to OrderItem
-    quantity    Int?
-    price       Decimal?
-
-    createdAt DateTime?
-    updatedAt DateTime?
-    deletedAt DateTime? // Soft deletion for history
-
-    orderId   String?
-    productId String?
-
-    orderItem OrderItem @relation(fields: [orderItemId], references: [id])
-
-    @@index([orderItemId])
-    @@map("order_item_histories")
+  PENDING
+  PAID
+  SHIPPED
+  DELIVERED
+  CANCELLED
 }

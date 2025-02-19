@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { Comment, Post } from './post.schema';
 import { Group } from './group.schema';
 import { Page } from './page.schema';
-import { Product } from './ecommerce.schema';
+import { Product } from './e-commerce.schema';
 
 // Tag Schema
 export const Tag = z
@@ -14,8 +14,8 @@ export const Tag = z
     updatedAt: z.date().nullable().optional(),
     deletedAt: z.date().nullable().optional(),
 
-    posts: z
-      .lazy(() => Post.array().nullable().optional())
+    comments: z
+      .lazy(() => Comment.array().nullable().optional())
       .nullable()
       .optional(),
     groups: z
@@ -26,14 +26,15 @@ export const Tag = z
       .lazy(() => Page.array().nullable().optional())
       .nullable()
       .optional(),
+    posts: z
+      .lazy(() => Post.array().nullable().optional())
+      .nullable()
+      .optional(),
     products: z
       .lazy(() => Product.array().nullable().optional())
       .nullable()
       .optional(),
-    comments: z
-      .lazy(() => Comment.array().nullable().optional())
-      .nullable()
-      .optional(),
+
     tagHistory: z
       .lazy(() => TagHistory.array().nullable().optional())
       .nullable()

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { User } from './user.schema';
+import { Page } from './page.schema';
 
 // Define Enum Separately
 export const NotificationType = z
@@ -20,12 +20,12 @@ export const Notification = z
     updatedAt: z.date().nullable().optional(),
     deletedAt: z.date().nullable().optional(),
 
-    userId: z.string().nullable().optional(),
-
-    user: z
-      .lazy(() => User.nullable().optional())
+    page: z
+      .lazy(() => Page.nullable().optional())
       .nullable()
       .optional(),
+    pageId: z.string().nullable().optional(),
+
     notificationHistory: z
       .lazy(() => NotificationHistory.array().nullable().optional())
       .nullable()
@@ -39,7 +39,7 @@ export const Notification = z
 export const NotificationHistory = z.object({
   id: z.string().nullable().optional(),
   notificationId: z.string().nullable().optional(),
-  type: NotificationType.nullable().optional(),
+  type: z.string().nullable().optional(),
   message: z.string().nullable().optional(),
   readAt: z.date().nullable().optional(),
 
@@ -47,7 +47,8 @@ export const NotificationHistory = z.object({
   updatedAt: z.date().nullable().optional(),
   deletedAt: z.date().nullable().optional(),
 
-  userId: z.string().nullable().optional(),
+  pageId: z.string().nullable().optional(),
+
   notification: z
     .lazy(() => Notification.nullable().optional())
     .nullable()

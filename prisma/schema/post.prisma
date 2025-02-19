@@ -1,168 +1,176 @@
-// Post related models
 model Post {
-    id        String    @id @default(uuid())
-    text      String?
-    media     Json?
-    isPinned  Boolean   @default(false)
-    createdAt DateTime  @default(now())
-    updatedAt DateTime  @updatedAt
-    deletedAt DateTime?
+  id       String  @id @default(uuid())
+  text     String?
+  media    Json?
+  isPinned Boolean @default(false)
 
-    groupId String?
-    group   Group?   @relation("GroupPosts", fields: [groupId], references: [id])
-    pageId  String?
-    page    Page?    @relation("PagePosts", fields: [pageId], references: [id])
-    address Address? // Renamed from postAddresses for consistency
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
-    comments    Comment[]
-    reactions   Reaction[]
-    tags        Tag[]
-    bookmarks   Bookmark[]
-    reports     Report[]
-    postHistory PostHistory[]
+  address Address?
 
-    @@index([groupId])
-    @@index([pageId])
-    @@map("posts")
+  group   Group?  @relation(fields: [groupId], references: [id])
+  groupId String?
+  page    Page?   @relation(fields: [pageId], references: [id])
+  pageId  String?
+
+  bookmarks Bookmark[]
+  comments  Comment[]
+  reactions Reaction[]
+  tags      Tag[]
+
+  reports Report[]
+
+  postHistory PostHistory[]
+
+  @@index([groupId])
+  @@index([pageId])
+  @@map("posts")
 }
 
 model Comment {
-    id    String  @id @default(uuid())
-    text  String?
-    media Json?
+  id    String  @id @default(uuid())
+  text  String?
+  media Json?
 
-    createdAt DateTime  @default(now())
-    updatedAt DateTime  @updatedAt
-    deletedAt DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
-    authorId String
-    author   User     @relation(fields: [authorId], references: [id])
-    postId   String
-    post     Post     @relation(fields: [postId], references: [id])
-    parentId String?
-    parent   Comment? @relation("CommentReplies", fields: [parentId], references: [id])
+  post      Post       @relation(fields: [postId], references: [id])
+  postId    String
+  author    Page       @relation(fields: [authorId], references: [id])
+  authorId  String
+  parent    Comment?   @relation("CommentReplies", fields: [parentId], references: [id])
+  parentId  String?
+  replies   Comment[]  @relation("CommentReplies")
+  reactions Reaction[]
+  tags      Tag[]
 
-    replies        Comment[]        @relation("CommentReplies")
-    reactions      Reaction[]
-    tags           Tag[]
-    reports        Report[]
-    commentHistory CommentHistory[]
+  reports Report[]
 
-    @@index([authorId])
-    @@index([postId])
-    @@index([parentId])
-    @@map("comments")
+  commentHistory CommentHistory[]
+
+  @@index([authorId])
+  @@index([postId])
+  @@index([parentId])
+  @@map("comments")
 }
 
 model Reaction {
-    id        String    @id @default(uuid())
-    emoji     String
-    createdAt DateTime  @default(now())
-    updatedAt DateTime  @updatedAt
-    deletedAt DateTime?
+  id    String @id @default(uuid())
+  emoji String
 
-    userId          String
-    user            User              @relation(fields: [userId], references: [id])
-    postId          String?
-    post            Post?             @relation(fields: [postId], references: [id])
-    commentId       String?
-    comment         Comment?          @relation(fields: [commentId], references: [id])
-    reactionHistory ReactionHistory[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
-    @@unique([userId, postId, commentId])
-    @@index([userId])
-    @@index([postId])
-    @@index([commentId])
-    @@map("reactions")
+  comment   Comment? @relation(fields: [commentId], references: [id])
+  commentId String?
+  post      Post?    @relation(fields: [postId], references: [id])
+  postId    String?
+  page      Page     @relation(fields: [pageId], references: [id])
+  pageId    String
+
+  reactionHistory ReactionHistory[]
+
+  @@unique([pageId, postId, commentId])
+  @@index([pageId])
+  @@index([postId])
+  @@index([commentId])
+  @@map("reactions")
 }
 
 model Bookmark {
-    id     String @id @default(uuid())
-    userId String
-    user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-    postId String
-    post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  id String @id @default(uuid())
 
-    createdAt       DateTime          @default(now())
-    updatedAt       DateTime          @updatedAt
-    deletedAt       DateTime?
-    bookmarkHistory BookmarkHistory[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
-    @@unique([userId, postId])
-    @@map("bookmarks")
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId String
+  page   Page   @relation(fields: [pageId], references: [id], onDelete: Cascade)
+  pageId String
+
+  bookmarkHistory BookmarkHistory[]
+
+  @@unique([pageId, postId])
+  @@map("bookmarks")
 }
 
-// History table for Post
 model PostHistory {
-    id        String    @id @default(uuid())
-    postId    String
-    text      String?
-    media     Json?
-    isPinned  Boolean?
-    createdAt DateTime?
-    updatedAt DateTime?
-    deletedAt DateTime?
+  id       String   @id @default(uuid())
+  postId   String
+  text     String?
+  media    Json?
+  isPinned Boolean?
 
-    groupId String?
-    pageId  String?
+  createdAt DateTime?
+  updatedAt DateTime?
+  deletedAt DateTime?
 
-    post Post @relation(fields: [postId], references: [id])
+  groupId String?
+  pageId  String?
 
-    @@index([postId])
-    @@map("post_histories")
+  post Post @relation(fields: [postId], references: [id])
+
+  @@index([postId])
+  @@map("post_histories")
 }
 
-// History table for Comment
 model CommentHistory {
-    id        String  @id @default(uuid())
-    commentId String
-    text      String?
-    media     Json?
+  id        String  @id @default(uuid())
+  commentId String
+  text      String?
+  media     Json?
 
-    createdAt DateTime?
-    updatedAt DateTime?
-    deletedAt DateTime?
+  createdAt DateTime?
+  updatedAt DateTime?
+  deletedAt DateTime?
 
-    authorId String?
-    postId   String?
-    parentId String?
+  postId   String?
+  authorId String?
+  parentId String?
 
-    comment Comment @relation(fields: [commentId], references: [id])
+  comment Comment @relation(fields: [commentId], references: [id])
 
-    @@index([commentId])
-    @@map("comment_histories")
+  @@index([commentId])
+  @@map("comment_histories")
 }
 
-// History table for Reaction
 model ReactionHistory {
-    id         String    @id @default(uuid())
-    reactionId String
-    emoji      String?
-    createdAt  DateTime?
-    updatedAt  DateTime?
-    deletedAt  DateTime?
+  id         String  @id @default(uuid())
+  reactionId String
+  emoji      String?
 
-    userId    String?
-    postId    String?
-    commentId String?
+  createdAt DateTime?
+  updatedAt DateTime?
+  deletedAt DateTime?
 
-    reaction Reaction @relation(fields: [reactionId], references: [id])
+  commentId String?
+  postId    String?
+  pageId    String?
 
-    @@index([reactionId])
-    @@map("reaction_histories")
+  reaction Reaction @relation(fields: [reactionId], references: [id])
+
+  @@index([reactionId])
+  @@map("reaction_histories")
 }
 
 model BookmarkHistory {
-    id         String  @id @default(uuid())
-    bookmarkId String
-    userId     String?
-    postId     String?
+  id         String @id @default(uuid())
+  bookmarkId String
 
-    createdAt DateTime?
-    updatedAt DateTime?
-    deletedAt DateTime?
+  createdAt DateTime?
+  updatedAt DateTime?
+  deletedAt DateTime?
 
-    bookmark Bookmark @relation(fields: [bookmarkId], references: [id])
+  postId String?
+  pageId String?
 
-    @@map("bookmarks_histories")
+  bookmark Bookmark @relation(fields: [bookmarkId], references: [id])
+
+  @@map("bookmark_histories")
 }

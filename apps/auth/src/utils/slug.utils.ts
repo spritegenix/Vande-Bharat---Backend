@@ -18,7 +18,7 @@ export class SlugUtil {
       });
       let slug = baseSlug;
 
-      const existingSlug = await this.prisma.page.findFirst({
+      const existingSlug = await this.prisma.user.findFirst({
         where: { slug, NOT: { id } },
         select: { slug: true },
       });
@@ -30,7 +30,7 @@ export class SlugUtil {
       do {
         slug = `${baseSlug}-${suffix++}`;
       } while (
-        await this.prisma.page.findFirst({ where: { slug, NOT: { id } } })
+        await this.prisma.user.findFirst({ where: { slug, NOT: { id } } })
       );
 
       return slug;

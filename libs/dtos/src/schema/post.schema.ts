@@ -4,7 +4,6 @@ import { Page } from './page.schema';
 import { Address } from './address.schema';
 import { Tag } from './tags.schema';
 import { Report } from './report.schema';
-import { User } from './user.schema';
 
 // Post Schema
 export const Post = z
@@ -18,21 +17,26 @@ export const Post = z
     updatedAt: z.date().nullable().optional(),
     deletedAt: z.date().nullable().optional(),
 
-    groupId: z.string().nullable().optional(),
-    group: z
-      .lazy(() => Group.nullable().optional())
-      .nullable()
-      .optional(),
-    page: z
-      .lazy(() => Page.nullable().optional())
-      .nullable()
-      .optional(),
-    pageId: z.string().nullable().optional(),
     address: z
       .lazy(() => Address.nullable().optional())
       .nullable()
       .optional(),
 
+    group: z
+      .lazy(() => Group.nullable().optional())
+      .nullable()
+      .optional(),
+    groupId: z.string().nullable().optional(),
+    page: z
+      .lazy(() => Page.nullable().optional())
+      .nullable()
+      .optional(),
+    pageId: z.string().nullable().optional(),
+
+    bookmarks: z
+      .lazy(() => Bookmark.array().nullable().optional())
+      .nullable()
+      .optional(),
     comments: z
       .lazy(() => Comment.array().nullable().optional())
       .nullable()
@@ -45,14 +49,12 @@ export const Post = z
       .lazy(() => Tag.array().nullable().optional())
       .nullable()
       .optional(),
-    bookmarks: z
-      .lazy(() => Bookmark.array().nullable().optional())
-      .nullable()
-      .optional(),
+
     reports: z
       .lazy(() => Report.array().nullable().optional())
       .nullable()
       .optional(),
+
     postHistory: z
       .lazy(() => PostHistory.array().nullable().optional())
       .nullable()
@@ -73,23 +75,21 @@ export const Comment = z
     updatedAt: z.date().nullable().optional(),
     deletedAt: z.date().nullable().optional(),
 
-    authorId: z.string().nullable().optional(),
-    postId: z.string().nullable().optional(),
-    parentId: z.string().nullable().optional(),
-
-    author: z
-      .lazy(() => User.nullable().optional())
-      .nullable()
-      .optional(),
     post: z
       .lazy(() => Post.nullable().optional())
       .nullable()
       .optional(),
+    postId: z.string().nullable().optional(),
+    author: z
+      .lazy(() => Page.nullable().optional())
+      .nullable()
+      .optional(),
+    authorId: z.string().nullable().optional(),
     parent: z
       .lazy(() => Comment.nullable().optional())
       .nullable()
       .optional(),
-
+    parentId: z.string().nullable().optional(),
     replies: z
       .lazy(() => Comment.array().nullable().optional())
       .nullable()
@@ -102,10 +102,12 @@ export const Comment = z
       .lazy(() => Tag.array().nullable().optional())
       .nullable()
       .optional(),
+
     reports: z
       .lazy(() => Report.array().nullable().optional())
       .nullable()
       .optional(),
+
     commentHistory: z
       .lazy(() => CommentHistory.array().nullable().optional())
       .nullable()
@@ -125,21 +127,21 @@ export const Reaction = z
     updatedAt: z.date().nullable().optional(),
     deletedAt: z.date().nullable().optional(),
 
-    userId: z.string().nullable().optional(),
-    user: z
-      .lazy(() => User.nullable().optional())
-      .nullable()
-      .optional(),
-    postId: z.string().nullable().optional(),
-    post: z
-      .lazy(() => Post.nullable().optional())
-      .nullable()
-      .optional(),
-    commentId: z.string().nullable().optional(),
     comment: z
       .lazy(() => Comment.nullable().optional())
       .nullable()
       .optional(),
+    commentId: z.string().nullable().optional(),
+    post: z
+      .lazy(() => Post.nullable().optional())
+      .nullable()
+      .optional(),
+    postId: z.string().nullable().optional(),
+    page: z
+      .lazy(() => Page.nullable().optional())
+      .nullable()
+      .optional(),
+    pageId: z.string().nullable().optional(),
 
     reactionHistory: z
       .lazy(() => ReactionHistory.array().nullable().optional())
@@ -159,16 +161,16 @@ export const Bookmark = z
     updatedAt: z.date().nullable().optional(),
     deletedAt: z.date().nullable().optional(),
 
-    user: z
-      .lazy(() => User.nullable().optional())
-      .nullable()
-      .optional(),
-    userId: z.string().nullable().optional(),
     post: z
       .lazy(() => Post.nullable().optional())
       .nullable()
       .optional(),
     postId: z.string().nullable().optional(),
+    page: z
+      .lazy(() => Page.nullable().optional())
+      .nullable()
+      .optional(),
+    pageId: z.string().nullable().optional(),
 
     bookmarkHistory: z
       .lazy(() => BookmarkHistory.array().nullable().optional())
@@ -211,8 +213,8 @@ export const CommentHistory = z.object({
   updatedAt: z.date().nullable().optional(),
   deletedAt: z.date().nullable().optional(),
 
-  authorId: z.string().nullable().optional(),
   postId: z.string().nullable().optional(),
+  authorId: z.string().nullable().optional(),
   parentId: z.string().nullable().optional(),
 
   comment: z
@@ -231,9 +233,9 @@ export const ReactionHistory = z.object({
   updatedAt: z.date().nullable().optional(),
   deletedAt: z.date().nullable().optional(),
 
-  userId: z.string().nullable().optional(),
-  postId: z.string().nullable().optional(),
   commentId: z.string().nullable().optional(),
+  postId: z.string().nullable().optional(),
+  pageId: z.string().nullable().optional(),
 
   reaction: z
     .lazy(() => Reaction.nullable().optional())
@@ -245,12 +247,13 @@ export const ReactionHistory = z.object({
 export const BookmarkHistory = z.object({
   id: z.string().nullable().optional(),
   bookmarkId: z.string().nullable().optional(),
-  userId: z.string().nullable().optional(),
-  postId: z.string().nullable().optional(),
 
   createdAt: z.date().nullable().optional(),
   updatedAt: z.date().nullable().optional(),
   deletedAt: z.date().nullable().optional(),
+
+  postId: z.string().nullable().optional(),
+  pageId: z.string().nullable().optional(),
 
   bookmark: z
     .lazy(() => Bookmark.nullable().optional())

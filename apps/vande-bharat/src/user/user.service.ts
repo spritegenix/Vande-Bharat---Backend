@@ -16,18 +16,10 @@ export class UserService {
       const include: Prisma.UserInclude = {
         ipAddresses: { where: { deletedAt: null } },
         credentials: { where: { deletedAt: null } },
-        comments: { where: { deletedAt: null } },
-        reactions: { where: { deletedAt: null } },
-        ownedGroups: { where: { deletedAt: null } },
-        joinedGroups: { where: { deletedAt: null } },
-        ownedPages: { where: { deletedAt: null } },
-        followingPages: { where: { deletedAt: null } },
-        orders: { where: { deletedAt: null } },
-        cartItems: { where: { deletedAt: null } },
-        donations: { where: { deletedAt: null } },
-        bookmarks: { where: { deletedAt: null } },
+        pages: {
+          where: { isDefault: true, deletedAt: null },
+        },
         reports: { where: { deletedAt: null } },
-        notifications: { where: { deletedAt: null } },
       };
 
       const userMe = await this.prisma.user.findUnique({

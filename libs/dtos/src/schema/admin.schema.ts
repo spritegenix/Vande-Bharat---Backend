@@ -6,6 +6,7 @@ export const Admin = z
     email: z.string().email().nullable().optional(),
     name: z.string().nullable().optional(),
     avatar: z.string().nullable().optional(),
+    hash: z.string().nullable().optional(),
 
     createdAt: z.date().nullable().optional(),
     updatedAt: z.date().nullable().optional(),
@@ -16,12 +17,14 @@ export const Admin = z
       .nullable()
       .optional(), // Lazy reference
     adminRoleId: z.string().nullable().optional(),
+
     adminHistory: z
       .lazy(() => AdminHistory.array().nullable().optional())
       .nullable()
       .optional(), // Lazy reference
   })
   .omit({
+    hash: true,
     adminHistory: true,
   });
 
@@ -39,6 +42,7 @@ export const AdminRole = z
       .lazy(() => Admin.array().nullable().optional())
       .nullable()
       .optional(), // Lazy reference
+
     adminRoleHistory: z
       .lazy(() => AdminRoleHistory.array().nullable().optional())
       .nullable()
@@ -54,10 +58,13 @@ export const AdminHistory = z.object({
   email: z.string().email().nullable().optional(),
   name: z.string().nullable().optional(),
   avatar: z.string().nullable().optional(),
+  hash: z.string().nullable().optional(),
 
   createdAt: z.date().nullable().optional(),
   updatedAt: z.date().nullable().optional(),
   deletedAt: z.date().nullable().optional(),
+
+  adminRoleId: z.string().nullable().optional(),
 
   admin: z
     .lazy(() => Admin.nullable().optional())

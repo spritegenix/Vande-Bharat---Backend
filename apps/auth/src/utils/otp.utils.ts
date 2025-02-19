@@ -45,11 +45,7 @@ export class OtpUtil {
           deletedAt: null,
         },
         include: {
-          user: {
-            include: {
-              ownedPages: true,
-            },
-          },
+          user: true,
         },
       });
 

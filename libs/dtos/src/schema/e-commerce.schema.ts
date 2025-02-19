@@ -2,7 +2,6 @@ import { z } from 'zod';
 import { Page } from './page.schema';
 import { ProductCategory } from './category.schema';
 import { Tag } from './tags.schema';
-import { User } from './user.schema';
 
 // Define Enums Separately
 export const OrderStatus = z
@@ -27,14 +26,19 @@ export const Product = z
     updatedAt: z.date().nullable().optional(),
     deletedAt: z.date().nullable().optional(),
 
-    pageId: z.string().nullable().optional(),
-    page: z
-      .lazy(() => Page.nullable().optional())
+    category: z
+      .lazy(() => ProductCategory.nullable().optional())
       .nullable()
       .optional(),
     categoryId: z.string().nullable().optional(),
-    category: z
-      .lazy(() => ProductCategory.nullable().optional())
+
+    seller: z
+      .lazy(() => Page.nullable().optional())
+      .nullable()
+      .optional(),
+    sellerId: z.string().nullable().optional(),
+    tags: z
+      .lazy(() => Tag.array().nullable().optional())
       .nullable()
       .optional(),
 
@@ -46,10 +50,7 @@ export const Product = z
       .lazy(() => OrderItem.array().nullable().optional())
       .nullable()
       .optional(),
-    tags: z
-      .lazy(() => Tag.array().nullable().optional())
-      .nullable()
-      .optional(),
+
     productHistory: z
       .lazy(() => ProductHistory.array().nullable().optional())
       .nullable()
@@ -69,16 +70,18 @@ export const CartItem = z
     updatedAt: z.date().nullable().optional(),
     deletedAt: z.date().nullable().optional(),
 
-    userId: z.string().nullable().optional(),
-    user: z
-      .lazy(() => User.nullable().optional())
-      .nullable()
-      .optional(),
-    productId: z.string().nullable().optional(),
+    sellerId: z.string().nullable().optional(),
     product: z
       .lazy(() => Product.nullable().optional())
       .nullable()
       .optional(),
+    productId: z.string().nullable().optional(),
+    buyerPage: z
+      .lazy(() => Page.nullable().optional())
+      .nullable()
+      .optional(),
+    buyerId: z.string().nullable().optional(),
+
     cartItemHistory: z
       .lazy(() => CartItemHistory.array().nullable().optional())
       .nullable()
@@ -94,21 +97,22 @@ export const Order = z
     id: z.string().nullable().optional(),
     status: OrderStatus.nullable().optional(),
     totalAmount: z.number().nullable().optional(),
+    razorpayId: z.string().nullable().optional(),
 
     createdAt: z.date().nullable().optional(),
     updatedAt: z.date().nullable().optional(),
     deletedAt: z.date().nullable().optional(),
 
-    userId: z.string().nullable().optional(),
-    user: z
-      .lazy(() => User.nullable().optional())
-      .nullable()
-      .optional(),
-
     orderItems: z
       .lazy(() => OrderItem.array().nullable().optional())
       .nullable()
       .optional(),
+    buyerPage: z
+      .lazy(() => Page.nullable().optional())
+      .nullable()
+      .optional(),
+    buyerId: z.string().nullable().optional(),
+
     orderHistory: z
       .lazy(() => OrderHistory.array().nullable().optional())
       .nullable()
@@ -129,16 +133,17 @@ export const OrderItem = z
     updatedAt: z.date().nullable().optional(),
     deletedAt: z.date().nullable().optional(),
 
-    orderId: z.string().nullable().optional(),
     order: z
       .lazy(() => Order.nullable().optional())
       .nullable()
       .optional(),
-    productId: z.string().nullable().optional(),
+    orderId: z.string().nullable().optional(),
     product: z
       .lazy(() => Product.nullable().optional())
       .nullable()
       .optional(),
+    productId: z.string().nullable().optional(),
+
     orderItemHistory: z
       .lazy(() => OrderItemHistory.array().nullable().optional())
       .nullable()
@@ -164,8 +169,8 @@ export const ProductHistory = z.object({
   updatedAt: z.date().nullable().optional(),
   deletedAt: z.date().nullable().optional(),
 
-  pageId: z.string().nullable().optional(),
   categoryId: z.string().nullable().optional(),
+  sellerId: z.string().nullable().optional(),
 
   product: z
     .lazy(() => Product.nullable().optional())
@@ -183,8 +188,9 @@ export const CartItemHistory = z.object({
   updatedAt: z.date().nullable().optional(),
   deletedAt: z.date().nullable().optional(),
 
-  userId: z.string().nullable().optional(),
+  sellerId: z.string().nullable().optional(),
   productId: z.string().nullable().optional(),
+  buyerId: z.string().nullable().optional(),
 
   cartItem: z
     .lazy(() => CartItem.nullable().optional())
@@ -196,14 +202,15 @@ export const CartItemHistory = z.object({
 export const OrderHistory = z.object({
   id: z.string().nullable().optional(),
   orderId: z.string().nullable().optional(),
-  status: OrderStatus.nullable().optional(),
+  status: z.string().nullable().optional(),
   totalAmount: z.number().nullable().optional(),
+  razorpayId: z.string().nullable().optional(),
 
   createdAt: z.date().nullable().optional(),
   updatedAt: z.date().nullable().optional(),
   deletedAt: z.date().nullable().optional(),
 
-  userId: z.string().nullable().optional(),
+  buyerId: z.string().nullable().optional(),
 
   order: z
     .lazy(() => Order.nullable().optional())

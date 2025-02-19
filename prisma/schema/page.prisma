@@ -1,4 +1,3 @@
-// Page related models
 model Page {
     id                 String      @id @default(uuid())
     slug               String?     @unique
@@ -7,86 +6,94 @@ model Page {
     banner             String?
     avatar             String?
     pageContactDetails Json?
-    privacy            PagePrivacy @default(PUBLIC)
-    isVerified         Boolean     @default(false)
-    isDefault          Boolean     @default(false) // Enforce only one default per user
+    isDefault          Boolean     @default(false)
     isHidden           Boolean     @default(false)
     isBlocked          Boolean     @default(false)
-    createdAt          DateTime    @default(now())
-    updatedAt          DateTime    @updatedAt
-    deletedAt          DateTime?
+    isVerified         Boolean     @default(false)
+    followerCount      Int?        @default(0)
+    postCount          Int?        @default(0)
+    privacy            PagePrivacy @default(PUBLIC)
 
-    followerCount Int? @default(0)
-    postCount     Int? @default(0)
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    deletedAt DateTime?
 
+    owner   User   @relation(fields: [ownerId], references: [id])
     ownerId String
-    owner   User   @relation("PageOwner", fields: [ownerId], references: [id])
 
-    followers   PageFollower[]
-    posts       Post[]         @relation("PagePosts")
-    products    Product[]
-    categories  Category[]
-    tags        Tag[]
-    addresses   Address[]
-    donations   Donation[]
+    categories    Category[]
+    tags          Tag[]
+    addresses     Address[]
+    notifications Notification[]
+
+    followers PageFollower[] @relation("PageFollowers")
+    following PageFollower[] @relation("PageFollowing")
+
+    ownedGroups  Group[]
+    joinedGroups GroupMember[]
+
+    posts     Post[]
+    comments  Comment[]
+    reactions Reaction[]
+    bookmarks Bookmark[]
+
+    orders    Order[] // Orders for this seller
+    products  Product[] // List of products sold by this seller
+    cartItems CartItem[] // List of CartItems for this page (seller's cart for buyers)
+
+    donated Donation[] @relation("PageReceivedDonations")
+    donors  Donation[] @relation("PageMadeDonations")
+
     reports     Report[]
     pageHistory PageHistory[]
 
     @@index([ownerId])
+    @@index([slug])
     @@map("pages")
 }
 
-enum PagePrivacy {
-    PRIVATE
-    PUBLIC
-}
-
 model PageFollower {
-    id        String       @id @default(uuid())
-    status    FollowStatus @default(PENDING)
-    createdAt DateTime     @default(now())
-    updatedAt DateTime     @updatedAt
+    id              String       @id @default(uuid())
+    status          FollowStatus @default(PENDING)
+    statusUpdatedAt DateTime? // Added to track last status change
+
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
     deletedAt DateTime?
 
-    userId              String
-    user                User                  @relation(fields: [userId], references: [id])
-    pageId              String
-    page                Page                  @relation(fields: [pageId], references: [id])
+    follower    Page   @relation("PageFollowers", fields: [followerId], references: [id], onDelete: Cascade)
+    followerId  String
+    following   Page   @relation("PageFollowing", fields: [followingId], references: [id], onDelete: Cascade)
+    followingId String
+
     pageFollowerHistory PageFollowerHistory[]
 
-    @@unique([userId, pageId])
-    @@index([userId])
-    @@index([pageId])
+    @@unique([followerId, followingId])
+    @@index([followerId])
+    @@index([followingId])
     @@map("page_followers")
 }
 
-enum FollowStatus {
-    PENDING
-    ACCEPTED
-    REJECTED
-}
-
-// History table for Page (tracks changes over time)
 model PageHistory {
-    id                 String    @id @default(uuid())
-    pageId             String // Foreign key to Page
+    id                 String   @id @default(uuid())
+    pageId             String
     slug               String?
     name               String?
     description        String?
     banner             String?
     avatar             String?
     pageContactDetails Json?
-    privacy            String?
-    isVerified         Boolean?
     isDefault          Boolean?
-    idHidden           Boolean?
+    isHidden           Boolean?
     isBlocked          Boolean?
-    createdAt          DateTime?
-    updatedAt          DateTime?
-    deletedAt          DateTime?
+    isVerified         Boolean?
+    followerCount      Int?
+    postCount          Int?
+    privacy            String?
 
-    followerCount Int?
-    postCount     Int?
+    createdAt DateTime? @default(now())
+    updatedAt DateTime? @updatedAt
+    deletedAt DateTime?
 
     ownerId String?
 
@@ -96,19 +103,32 @@ model PageHistory {
     @@map("page_histories")
 }
 
-// History table for PageFollower (tracks changes over time)
 model PageFollowerHistory {
-    id             String    @id @default(uuid())
-    pageFollowerId String // Foreign key to PageFollower
-    createdAt      DateTime?
-    updatedAt      DateTime?
-    deletedAt      DateTime?
+    id              String        @id @default(uuid())
+    pageFollowerId  String
+    status          FollowStatus?
+    statusUpdatedAt DateTime? // Track the last time the status changed
 
-    userId String?
-    pageId String?
+    createdAt DateTime? @default(now())
+    updatedAt DateTime? @updatedAt
+    deletedAt DateTime?
+
+    followerId  String?
+    followingId String?
 
     pageFollower PageFollower @relation(fields: [pageFollowerId], references: [id])
 
     @@index([pageFollowerId])
     @@map("page_follower_histories")
+}
+
+enum PagePrivacy {
+    PRIVATE
+    PUBLIC
+}
+
+enum FollowStatus {
+    PENDING
+    ACCEPTED
+    REJECTED
 }

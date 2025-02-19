@@ -73,7 +73,7 @@ export class AuthService {
             id: id,
             name: payload.name,
             hash,
-            ownedPages: {
+            pages: {
               create: { id: id, name: payload.name, isDefault: true },
             },
           },
@@ -97,7 +97,15 @@ export class AuthService {
         }
 
         return {
-          message: `Verification code sent to ${payload.email || payload.phone}`,
+          message: `Verification code sent to ${
+            payload.email && payload.phone
+              ? `${payload.email} and ${payload.phone}`
+              : payload.email
+                ? payload.email
+                : payload.phone
+                  ? payload.phone
+                  : 'unknown contact'
+          }`,
         };
       });
     } catch (error) {
@@ -124,6 +132,7 @@ export class AuthService {
       const user = await this.prisma.user.update({
         where: { id: credential.user.id },
         data: {
+          slug: slug,
           credentials: {
             update: {
               where: { id: credential.id },
@@ -135,23 +144,22 @@ export class AuthService {
               },
             },
           },
-          ownedPages: {
+          pages: {
             update: {
-              where: { id: credential.user.ownedPages[0].id }, // Ensure proper filtering
-              data: { slug }, // Update slug correctly
+              where: { id: credential.user.id }, // Ensure proper filtering
+              data: { slug: slug }, // Update slug correctly
             },
           },
         },
         include: {
           credentials: {
             where: {
-              isVerified: true,
-              verifiedAt: { not: null },
+              id: credential.id,
               deletedAt: null,
             },
           },
-          ownedPages: {
-            where: { isDefault: true, deletedAt: null },
+          pages: {
+            where: { id: credential.user.id, deletedAt: null },
           },
         },
       });
@@ -161,7 +169,7 @@ export class AuthService {
         token: await this.jwtUtil.signToken(
           user.id,
           user.credentials[0].value,
-          user.ownedPages[0].name,
+          user.pages[0].name,
         ),
       };
     } catch (error) {
@@ -192,7 +200,7 @@ export class AuthService {
               deletedAt: null,
             },
           },
-          ownedPages: { where: { isDefault: true, deletedAt: null } },
+          pages: { where: { isDefault: true, deletedAt: null } },
         },
       });
 
@@ -211,51 +219,11 @@ export class AuthService {
         token: await this.jwtUtil.signToken(
           existingUser.id,
           existingUser.credentials[0].value,
-          existingUser.ownedPages[0].name,
+          existingUser.pages[0].name,
         ),
       };
     } catch (error) {
       this.errorUtil.handleError(error);
-    }
-  }
-
-  async validateHeader(payload: ValidateHeaderPayloadDto) {
-    try {
-      let user: User = undefined;
-
-      const tokenPayload = await this.verifyToken(payload.headers);
-
-      if (!tokenPayload) {
-        throw new UnauthorizedException('Invalid token');
-      }
-
-      user = await this.prisma.user.findUnique({
-        where: { id: tokenPayload.sub as string },
-      });
-      if (!user) {
-        throw new UnauthorizedException('User not found');
-      }
-
-      return user; // Return user data if valid
-    } catch (error) {
-      this.errorUtil.handleError(error);
-    }
-  }
-
-  private async verifyToken(headers: any) {
-    try {
-      if (!headers?.authorization) {
-        return null;
-      }
-      const authHeader = headers?.authorization;
-
-      const token = authHeader?.startsWith('Bearer ')
-        ? authHeader.split(' ')[1]
-        : null;
-
-      return await this.jwtUtil.verifyToken(token);
-    } catch {
-      throw new UnauthorizedException('JWT verification failed');
     }
   }
 
@@ -306,11 +274,59 @@ export class AuthService {
         }
 
         return {
-          message: `Verification code sent to ${payload.email || payload.phone}`,
+          message: `Verification code sent to ${
+            payload.email && payload.phone
+              ? `${payload.email} and ${payload.phone}`
+              : payload.email
+                ? payload.email
+                : payload.phone
+                  ? payload.phone
+                  : 'unknown contact'
+          }`,
         };
       });
     } catch (error) {
       this.errorUtil.handleError(error);
+    }
+  }
+
+  async validateHeader(payload: ValidateHeaderPayloadDto) {
+    try {
+      let user: User = undefined;
+
+      const tokenPayload = await this.verifyToken(payload.headers);
+
+      if (!tokenPayload) {
+        throw new UnauthorizedException('Invalid token');
+      }
+
+      user = await this.prisma.user.findUnique({
+        where: { id: tokenPayload.sub as string },
+      });
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      return user; // Return user data if valid
+    } catch (error) {
+      this.errorUtil.handleError(error);
+    }
+  }
+
+  private async verifyToken(headers: any) {
+    try {
+      if (!headers?.authorization) {
+        return null;
+      }
+      const authHeader = headers?.authorization;
+
+      const token = authHeader?.startsWith('Bearer ')
+        ? authHeader.split(' ')[1]
+        : null;
+
+      return await this.jwtUtil.verifyToken(token);
+    } catch {
+      throw new UnauthorizedException('JWT verification failed');
     }
   }
 }
