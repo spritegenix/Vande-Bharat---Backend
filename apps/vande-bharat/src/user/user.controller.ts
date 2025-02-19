@@ -10,8 +10,8 @@ import { UserService } from './user.service';
 import { GetUser } from '../auth/decorator';
 import { ZodResponseInterceptor } from '@app/interceptors/zod';
 import {
-  UserCredentialResponseDto,
-  UserMeResponseDto,
+  GetCredentialResponseDto,
+  GetUserResponseDto,
   ValidateHeaderResponseDto,
 } from '@app/dtos';
 // import { ZodBodyValidationPipe } from '@app/pipes/zod';
@@ -21,15 +21,15 @@ import {
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @UseInterceptors(new ZodResponseInterceptor(UserMeResponseDto, true))
-  @Get('me')
-  async getMe(@GetUser() user: ValidateHeaderResponseDto) {
-    return await this.userService.me(user);
+  @UseInterceptors(new ZodResponseInterceptor(GetUserResponseDto, true))
+  @Get()
+  async getUser(@GetUser() user: ValidateHeaderResponseDto) {
+    return await this.userService.getUser(user);
   }
 
-  @UseInterceptors(new ZodResponseInterceptor(UserCredentialResponseDto, true))
+  @UseInterceptors(new ZodResponseInterceptor(GetCredentialResponseDto, true))
   @Get('credentials')
-  async getAllCredentials(@GetUser() user: ValidateHeaderResponseDto) {
-    return await this.userService.getAllCredentials(user);
+  async getCredentials(@GetUser() user: ValidateHeaderResponseDto) {
+    return await this.userService.getCredentials(user);
   }
 }

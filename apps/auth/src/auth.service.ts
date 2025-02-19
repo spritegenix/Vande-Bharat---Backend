@@ -297,7 +297,7 @@ export class AuthService {
       const tokenPayload = await this.verifyToken(payload.headers);
 
       if (!tokenPayload) {
-        throw new UnauthorizedException('Invalid token');
+        return undefined;
       }
 
       user = await this.prisma.user.findUnique({

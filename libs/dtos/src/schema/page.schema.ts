@@ -66,7 +66,7 @@ export const Page = z
       .nullable()
       .optional(),
 
-    followers: z
+    follower: z
       .lazy(() => PageFollower.array().nullable().optional())
       .nullable()
       .optional(),

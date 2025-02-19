@@ -1,30 +1,29 @@
 import { z } from 'zod';
 
 // ✅ Signup Request Schema (Zod)
-export const GetFollowingRequestBodyDto = z.any();
+export const GetFollowerRequestBodyDto = z.object({});
 
 // ✅ TypeScript Type Inference
-export type GetFollowingRequestBodyDto = z.infer<
-  typeof GetFollowingRequestBodyDto
+export type GetFollowerRequestBodyDto = z.infer<
+  typeof GetFollowerRequestBodyDto
 >;
 
 // ✅ Signup Request Schema (Zod)
-export const GetFollowingRequestParamDto = z.object({
+export const GetFollowerRequestParamDto = z.object({
   pageId: z
     .string()
     .trim() // First trim to clean the string
     .min(1, 'Page ID is required'), // Ensure it's not empty
-
-  followingId: z.string().trim().min(1, 'Page Follower ID is required'),
+  followerId: z.string().trim().optional(),
 });
 
 // ✅ TypeScript Type Inference
-export type GetFollowingRequestParamDto = z.infer<
-  typeof GetFollowingRequestParamDto
+export type GetFollowerRequestParamDto = z.infer<
+  typeof GetFollowerRequestParamDto
 >;
 
 // ✅ Signup Response Schema (Zod)
-export const GetFollowingResponseDto = z
+export const GetFollowerResponseDto = z
   .object({
     pageHistory: z.any(),
   })
@@ -32,4 +31,4 @@ export const GetFollowingResponseDto = z
   .passthrough();
 
 // ✅ TypeScript Type for Response
-export type GetFollowingResponseDto = z.infer<typeof GetFollowingResponseDto>;
+export type GetFollowerResponseDto = z.infer<typeof GetFollowerResponseDto>;

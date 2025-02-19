@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { Page } from '../schema';
 
 // ✅ Signup Request Schema (Zod)
 export const CreatePageRequestBodyDto = z.object({
@@ -33,13 +32,12 @@ export type CreatePageRequestParamDto = z.infer<
 >;
 
 // ✅ Signup Response Schema (Zod)
-export const CreatePageResponseDto = z.lazy(() =>
-  Page.extend({
-    message: z.string().nullable().optional(),
+export const CreatePageResponseDto = z
+  .object({
+    pageHistory: z.any(),
   })
-    .nullable()
-    .optional(),
-);
+  .omit({ pageHistory: true })
+  .passthrough();
 
 // ✅ TypeScript Type for Response
 export type CreatePageResponseDto = z.infer<typeof CreatePageResponseDto>;

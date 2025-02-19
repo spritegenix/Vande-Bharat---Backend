@@ -27,7 +27,7 @@ model Page {
     addresses     Address[]
     notifications Notification[]
 
-    followers PageFollower[] @relation("PageFollowers")
+    follower  PageFollower[] @relation("PageFollowers")
     following PageFollower[] @relation("PageFollowing")
 
     ownedGroups  Group[]

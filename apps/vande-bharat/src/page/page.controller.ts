@@ -18,20 +18,20 @@ import {
   CreatePageRequestBodyDto,
   CreatePageResponseDto,
   CreateFollowingResponseDto,
-  DeleteFollowersRequestParamDto,
+  DeleteFollowerRequestParamDto,
   DeleteFollowingRequestParamDto,
   DeletePageRequestParamDto,
   DeletePageResponseDto,
-  DeleteFollowersResponseDto,
+  DeleteFollowerResponseDto,
   DeleteFollowingResponseDto,
-  GetFollowersRequestParamDto,
+  GetFollowerRequestParamDto,
   GetFollowingRequestParamDto,
-  GetFollowersResponseDto,
+  GetFollowerResponseDto,
   GetPageRequestParamDto,
   GetPageResponseDto,
-  UpdateFollowersRequestBodyDto,
-  UpdateFollowersRequestParamDto,
-  UpdateFollowersResponseDto,
+  UpdateFollowerRequestBodyDto,
+  UpdateFollowerRequestParamDto,
+  UpdateFollowerResponseDto,
   UpdateFollowingRequestParamDto,
   UpdateFollowingResponseDto,
   UpdatePageRequestBodyDto,
@@ -116,37 +116,37 @@ export class PageController {
   }
 
   @Get(':pageId/follower/:followerId')
-  @UsePipes(new ZodParamValidationPipe(GetFollowersRequestParamDto))
-  @UseInterceptors(new ZodResponseInterceptor(GetFollowersResponseDto))
-  async getFollowers(
+  @UsePipes(new ZodParamValidationPipe(GetFollowerRequestParamDto))
+  @UseInterceptors(new ZodResponseInterceptor(GetFollowerResponseDto))
+  async getFollower(
     @GetUser() user: ValidateHeaderResponseDto,
-    @Param() param: GetFollowersRequestParamDto,
+    @Param() param: GetFollowerRequestParamDto,
   ) {
-    return await this.pageService.getFollowers(user, param);
+    return await this.pageService.getFollower(user, param);
   }
 
   @Put(':pageId/follower/:followerId')
   @UsePipes(
-    new ZodParamValidationPipe(UpdateFollowersRequestParamDto),
-    new ZodBodyValidationPipe(UpdateFollowersRequestBodyDto),
+    new ZodParamValidationPipe(UpdateFollowerRequestParamDto),
+    new ZodBodyValidationPipe(UpdateFollowerRequestBodyDto),
   )
-  @UseInterceptors(new ZodResponseInterceptor(UpdateFollowersResponseDto))
+  @UseInterceptors(new ZodResponseInterceptor(UpdateFollowerResponseDto))
   async updateFollower(
     @GetUser() user: ValidateHeaderResponseDto,
-    @Param() param: UpdateFollowersRequestParamDto,
-    @Body() body: UpdateFollowersRequestBodyDto,
+    @Param() param: UpdateFollowerRequestParamDto,
+    @Body() body: UpdateFollowerRequestBodyDto,
   ) {
-    return await this.pageService.updateFollowers(user, param, body);
+    return await this.pageService.updateFollower(user, param, body);
   }
 
   @Delete(':pageId/follower/:followerId')
-  @UsePipes(new ZodParamValidationPipe(DeleteFollowersRequestParamDto))
-  @UseInterceptors(new ZodResponseInterceptor(DeleteFollowersResponseDto))
+  @UsePipes(new ZodParamValidationPipe(DeleteFollowerRequestParamDto))
+  @UseInterceptors(new ZodResponseInterceptor(DeleteFollowerResponseDto))
   async deleteFollower(
     @GetUser() user: ValidateHeaderResponseDto,
-    @Param() param: UpdateFollowersRequestParamDto,
+    @Param() param: UpdateFollowerRequestParamDto,
   ) {
-    return await this.pageService.deleteFollowers(user, param);
+    return await this.pageService.deleteFollower(user, param);
   }
 
   @Get(':pageId/following/:followingId')

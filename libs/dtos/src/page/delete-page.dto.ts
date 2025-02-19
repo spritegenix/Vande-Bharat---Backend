@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { Page } from '../schema';
 
 // ✅ Signup Request Schema (Zod)
 export const DeletePageRequestBodyDto = z.any();
@@ -18,13 +17,9 @@ export type DeletePageRequestParamDto = z.infer<
 >;
 
 // ✅ Signup Response Schema (Zod)
-export const DeletePageResponseDto = z.lazy(() =>
-  Page.extend({
-    message: z.string().nullable().optional(),
-  })
-    .nullable()
-    .optional(),
-);
+export const DeletePageResponseDto = z.object({
+  message: z.string().nullable().optional(),
+});
 
 // ✅ TypeScript Type for Response
 export type DeletePageResponseDto = z.infer<typeof DeletePageResponseDto>;

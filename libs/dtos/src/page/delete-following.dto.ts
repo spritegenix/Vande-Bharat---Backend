@@ -1,8 +1,7 @@
-import { any, z } from 'zod';
-import { PageFollower } from '../schema';
+import { z } from 'zod';
 
 // ✅ Signup Request Schema (Zod)
-export const DeleteFollowingRequestBodyDto = any();
+export const DeleteFollowingRequestBodyDto = z.any();
 
 // ✅ TypeScript Type Inference
 export type DeleteFollowingRequestBodyDto = z.infer<
@@ -25,13 +24,9 @@ export type DeleteFollowingRequestParamDto = z.infer<
 >;
 
 // ✅ Signup Response Schema (Zod)
-export const DeleteFollowingResponseDto = z.lazy(() =>
-  PageFollower.extend({
-    message: z.string().nullable().optional(),
-  })
-    .nullable()
-    .optional(),
-);
+export const DeleteFollowingResponseDto = z.object({
+  message: z.string().nullable().optional(),
+});
 
 // ✅ TypeScript Type for Response
 export type DeleteFollowingResponseDto = z.infer<

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@app/prisma';
 import { ErrorUtil } from '../utils';
@@ -10,8 +10,11 @@ export class UserService {
     private readonly prisma: PrismaService,
     private readonly errorUtil: ErrorUtil,
   ) {}
-  async me(user: ValidateHeaderResponseDto) {
+  async getUser(user: ValidateHeaderResponseDto) {
     try {
+      if (!user.id) {
+        throw new UnauthorizedException('User id not found');
+      }
       const where: Prisma.UserWhereUniqueInput = { id: user.id };
       const include: Prisma.UserInclude = {
         ipAddresses: { where: { deletedAt: null } },
@@ -22,19 +25,22 @@ export class UserService {
         reports: { where: { deletedAt: null } },
       };
 
-      const userMe = await this.prisma.user.findUnique({
+      const response = await this.prisma.user.findUnique({
         where,
         include,
       });
 
-      return userMe;
+      return response;
     } catch (error) {
       this.errorUtil.handleError(error);
     }
   }
 
-  async getAllCredentials(user: ValidateHeaderResponseDto) {
+  async getCredentials(user: ValidateHeaderResponseDto) {
     try {
+      if (!user.id) {
+        throw new UnauthorizedException('User id not found');
+      }
       const where: Prisma.CredentialWhereInput = {
         userId: user.id,
         deletedAt: null,

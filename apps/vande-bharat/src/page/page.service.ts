@@ -9,14 +9,14 @@ import { ErrorUtil, FileUtil } from '../utils';
 import {
   CreateFollowingRequestParamDto,
   CreatePageRequestBodyDto,
-  DeleteFollowersRequestParamDto,
+  DeleteFollowerRequestParamDto,
   DeleteFollowingRequestParamDto,
   DeletePageRequestParamDto,
-  GetFollowersRequestParamDto,
+  GetFollowerRequestParamDto,
   GetFollowingRequestParamDto,
   GetPageRequestParamDto,
-  UpdateFollowersRequestBodyDto,
-  UpdateFollowersRequestParamDto,
+  UpdateFollowerRequestBodyDto,
+  UpdateFollowerRequestParamDto,
   UpdateFollowingRequestParamDto,
   UpdatePageRequestBodyDto,
   UpdatePageRequestParamDto,
@@ -58,19 +58,10 @@ export class PageService {
             tags: { where: { deletedAt: null } },
             addresses: { where: { deletedAt: null } },
             notifications: { where: { deletedAt: null } },
-            followers: { where: { deletedAt: null } },
+            follower: { where: { deletedAt: null } },
             following: { where: { deletedAt: null } },
             ownedGroups: { where: { deletedAt: null } },
             joinedGroups: { where: { deletedAt: null } },
-            posts: { where: { deletedAt: null } },
-            comments: { where: { deletedAt: null } },
-            reactions: { where: { deletedAt: null } },
-            bookmarks: { where: { deletedAt: null } },
-            orders: { where: { deletedAt: null } },
-            products: { where: { deletedAt: null } },
-            cartItems: { where: { deletedAt: null } },
-            donated: { where: { deletedAt: null } },
-            donors: { where: { deletedAt: null } },
             reports: { where: { deletedAt: null } },
           },
         };
@@ -267,9 +258,9 @@ export class PageService {
     }
   }
 
-  async getFollowers(
+  async getFollower(
     user: ValidateHeaderResponseDto,
-    param: GetFollowersRequestParamDto,
+    param: GetFollowerRequestParamDto,
   ) {
     try {
       const pageExists = await this.pageExists(param.pageId);
@@ -335,10 +326,10 @@ export class PageService {
     }
   }
 
-  async updateFollowers(
+  async updateFollower(
     user: ValidateHeaderResponseDto,
-    param: UpdateFollowersRequestParamDto,
-    body: UpdateFollowersRequestBodyDto,
+    param: UpdateFollowerRequestParamDto,
+    body: UpdateFollowerRequestBodyDto,
   ) {
     try {
       const pageExists = await this.pageExists(param.pageId);
@@ -368,9 +359,9 @@ export class PageService {
     }
   }
 
-  async deleteFollowers(
+  async deleteFollower(
     user: ValidateHeaderResponseDto,
-    param: DeleteFollowersRequestParamDto,
+    param: DeleteFollowerRequestParamDto,
   ) {
     try {
       const pageExists = await this.pageExists(param.pageId);
