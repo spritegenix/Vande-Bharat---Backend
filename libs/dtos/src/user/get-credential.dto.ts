@@ -7,7 +7,10 @@ export type GetCredentialRequestBodyDto = z.infer<
   typeof GetCredentialRequestBodyDto
 >;
 
-export const GetCredentialRequestParamDto = z.any();
+export const GetCredentialRequestParamDto = z.object({
+  userId: z.string().trim().optional(),
+  credentialId: z.string().trim().optional(),
+});
 // Correctly infer the type of CredentialMeResponseDto
 export type GetCredentialRequestParamDto = z.infer<
   typeof GetCredentialRequestParamDto
@@ -18,7 +21,12 @@ export const GetCredentialResponseDto = z
     otp: z.any(),
     otpExpiresAt: z.any(),
   })
-  .omit({ otp: true, otpExpiresAt: true })
-  .passthrough();
+  .passthrough()
+  .transform(
+    (
+      { otp, otpExpiresAt, ...rest }, // eslint-disable-line @typescript-eslint/no-unused-vars
+    ) => rest,
+  )
+  .array();
 // Correctly infer the type of CredentialMeResponseDto
 export type GetCredentialResponseDto = z.infer<typeof GetCredentialResponseDto>;

@@ -19,8 +19,12 @@ export const GetPageResponseDto = z
   .object({
     pageHistory: z.any(),
   })
-  .omit({ pageHistory: true })
-  .passthrough();
+  .passthrough()
+  .transform(
+    (
+      { pageHistory, ...rest }, // eslint-disable-line @typescript-eslint/no-unused-vars
+    ) => rest,
+  );
 
 // ✅ TypeScript Type for Response
 export type GetPageResponseDto = z.infer<typeof GetPageResponseDto>;

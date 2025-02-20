@@ -1,8 +1,16 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '@app/prisma';
 import { ErrorUtil } from '../utils';
-import { ValidateHeaderResponseDto } from '@app/dtos';
+import {
+  GetCredentialRequestParamDto,
+  GetUserRequestParamDto,
+  ValidateHeaderResponseDto,
+} from '@app/dtos';
 
 @Injectable()
 export class UserService {
@@ -10,25 +18,60 @@ export class UserService {
     private readonly prisma: PrismaService,
     private readonly errorUtil: ErrorUtil,
   ) {}
-  async getUser(user: ValidateHeaderResponseDto) {
+  async getUser(
+    user: ValidateHeaderResponseDto,
+    param: GetUserRequestParamDto,
+  ) {
     try {
-      if (!user.id) {
-        throw new UnauthorizedException('User id not found');
+      const id = param.userId || user.id || user.slug;
+
+      if (!id) {
+        throw new NotFoundException('User id not provided');
       }
-      const where: Prisma.UserWhereUniqueInput = { id: user.id };
-      const include: Prisma.UserInclude = {
-        ipAddresses: { where: { deletedAt: null } },
-        credentials: { where: { deletedAt: null } },
-        pages: {
-          where: { isDefault: true, deletedAt: null },
-        },
-        reports: { where: { deletedAt: null } },
+
+      let where: Prisma.UserWhereInput;
+      let queryOptions: {
+        include?: Prisma.UserInclude;
+        select?: Prisma.UserSelect;
       };
 
-      const response = await this.prisma.user.findUnique({
+      if (id == user.id || id == user.slug) {
+        where = { OR: [{ id }, { slug: id }], deletedAt: null };
+        queryOptions = {
+          include: {
+            credentials: { where: { deletedAt: null } },
+            pages: {
+              where: { isDefault: true, deletedAt: null },
+            },
+            reports: { where: { deletedAt: null } },
+          },
+        };
+      } else {
+        where = {
+          OR: [{ id }, { slug: id }],
+          isHidden: false,
+          isBlocked: false,
+          deletedAt: null,
+        };
+        queryOptions = {
+          select: {
+            id: true,
+            slug: true,
+            name: true,
+            avatar: true,
+            isVerified: true,
+          },
+        };
+      }
+
+      const response = await this.prisma.user.findFirst({
         where,
-        include,
+        ...queryOptions,
       });
+
+      if (!response) {
+        throw new NotFoundException('User not found');
+      }
 
       return response;
     } catch (error) {
@@ -36,19 +79,44 @@ export class UserService {
     }
   }
 
-  async getCredentials(user: ValidateHeaderResponseDto) {
+  async getCredential(
+    user: ValidateHeaderResponseDto,
+    param: GetCredentialRequestParamDto,
+  ) {
     try {
-      if (!user.id) {
-        throw new UnauthorizedException('User id not found');
+      const userId = param.userId || user.id || user.slug;
+
+      if (!userId) {
+        throw new NotFoundException('User id not provided');
       }
-      const where: Prisma.CredentialWhereInput = {
-        userId: user.id,
-        deletedAt: null,
+
+      let where: Prisma.CredentialWhereInput;
+      let queryOptions: {
+        include?: Prisma.CredentialInclude;
+        select?: Prisma.CredentialSelect;
       };
+
+      if (userId == user.id || userId == user.slug) {
+        where = {
+          id: param.credentialId,
+          user: { OR: [{ id: userId }, { slug: userId }], deletedAt: null },
+          deletedAt: null,
+        };
+        queryOptions = {
+          include: {},
+        };
+      } else {
+        throw new UnauthorizedException('Unauthorised access');
+      }
 
       const create = await this.prisma.credential.findMany({
         where,
+        ...queryOptions,
       });
+
+      if (!create) {
+        throw new NotFoundException('Credential not found');
+      }
 
       return create;
     } catch (error) {

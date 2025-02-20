@@ -26,10 +26,14 @@ export type UpdateFollowingRequestParamDto = z.infer<
 // ✅ Signup Response Schema (Zod)
 export const UpdateFollowingResponseDto = z
   .object({
-    pageHistory: z.any(),
+    pageFollowerHistory: z.any(),
   })
-  .omit({ pageHistory: true })
-  .passthrough();
+  .passthrough()
+  .transform(
+    (
+      { pageFollowerHistory, ...rest }, // eslint-disable-line @typescript-eslint/no-unused-vars
+    ) => rest,
+  );
 
 // ✅ TypeScript Type for Response
 export type UpdateFollowingResponseDto = z.infer<

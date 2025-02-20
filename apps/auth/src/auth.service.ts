@@ -12,7 +12,7 @@ import {
   PasswordUtil,
   SlugUtil,
 } from './utils';
-import { Prisma, User } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '@app/prisma';
 import {
   AddCredentialPayloadDto,
@@ -168,6 +168,7 @@ export class AuthService {
         ...user,
         token: await this.jwtUtil.signToken(
           user.id,
+          user.slug,
           user.credentials[0].value,
           user.pages[0].name,
         ),
@@ -218,6 +219,7 @@ export class AuthService {
         ...existingUser,
         token: await this.jwtUtil.signToken(
           existingUser.id,
+          existingUser.slug,
           existingUser.credentials[0].value,
           existingUser.pages[0].name,
         ),
@@ -292,38 +294,37 @@ export class AuthService {
 
   async validateHeader(payload: ValidateHeaderPayloadDto) {
     try {
-      let user: User = undefined;
-
       const tokenPayload = await this.verifyToken(payload.headers);
 
       if (!tokenPayload) {
-        return undefined;
+        return {
+          id: undefined,
+          slug: undefined,
+        };
       }
 
-      user = await this.prisma.user.findUnique({
+      const user = await this.prisma.user.findUnique({
         where: { id: tokenPayload.sub as string },
       });
+
       if (!user) {
         throw new UnauthorizedException('User not found');
       }
 
       return user; // Return user data if valid
     } catch (error) {
-      this.errorUtil.handleError(error);
+      throw this.errorUtil.handleError(error); // Ensure the error is thrown
     }
   }
 
   private async verifyToken(headers: any) {
     try {
-      if (!headers?.authorization) {
-        return null;
-      }
       const authHeader = headers?.authorization;
+      if (!authHeader?.startsWith('Bearer ')) {
+        return undefined; // Use consistent return type for invalid headers
+      }
 
-      const token = authHeader?.startsWith('Bearer ')
-        ? authHeader.split(' ')[1]
-        : null;
-
+      const token = authHeader.split(' ')[1];
       return await this.jwtUtil.verifyToken(token);
     } catch {
       throw new UnauthorizedException('JWT verification failed');

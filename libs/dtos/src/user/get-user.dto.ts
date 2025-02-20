@@ -6,17 +6,23 @@ export const GetUserRequestBodyDto = z.any();
 // Correctly infer the type of UserMeResponseDto
 export type GetUserRequestBodyDto = z.infer<typeof GetUserRequestBodyDto>;
 
-export const GetUserRequestParamDto = z.any();
+export const GetUserRequestParamDto = z.object({
+  userId: z.string().trim().optional(),
+});
 // Correctly infer the type of UserMeResponseDto
 export type GetUserRequestParamDto = z.infer<typeof GetUserRequestParamDto>;
 
 export const GetUserResponseDto = z
   .object({
-    hash: z.any(),
-    ipAddress: z.any(),
-    userHistory: z.any(),
+    hash: z.unknown(),
+    ipAddress: z.unknown(),
+    userHistory: z.unknown(),
   })
-  .omit({ hash: true, ipAddress: true, userHistory: true })
-  .passthrough();
-// Correctly infer the type of UserMeResponseDto
+  .passthrough()
+  .transform(
+    (
+      { hash, ipAddress, userHistory, ...rest }, // eslint-disable-line @typescript-eslint/no-unused-vars
+    ) => rest,
+  );
+
 export type GetUserResponseDto = z.infer<typeof GetUserResponseDto>;

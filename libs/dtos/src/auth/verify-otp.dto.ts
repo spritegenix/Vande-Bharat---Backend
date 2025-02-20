@@ -11,9 +11,9 @@ export const VerifyOtpRequestBodyDto = z
       .optional(),
     otp: z.string().length(6, 'OTP must be exactly 6 digits'),
   })
-  .refine((data) => data.email || data.phone, {
-    message: 'Either email or phone must be provided',
-    path: ['email', 'phone'],
+  .refine((data) => (data.email ? !data.phone : data.phone), {
+    message: 'Either email or phone must be provided, but not both.',
+    path: ['email', 'phone'], // Affects both fields in error messages
   });
 
 // ✅ TypeScript Type Inference for Request DTO
@@ -30,9 +30,9 @@ export const VerifyOtpPayloadDto = z
       .optional(),
     otp: z.string().length(6, 'OTP must be exactly 6 digits'),
   })
-  .refine((data) => data.email || data.phone, {
-    message: 'Either email or phone must be provided',
-    path: ['email', 'phone'],
+  .refine((data) => (data.email ? !data.phone : data.phone), {
+    message: 'Either email or phone must be provided, but not both.',
+    path: ['email', 'phone'], // Affects both fields in error messages
   });
 
 // ✅ TypeScript Type Inference for Request DTO

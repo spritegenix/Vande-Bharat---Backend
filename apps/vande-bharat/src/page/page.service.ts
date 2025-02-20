@@ -40,9 +40,8 @@ export class PageService {
     param: GetPageRequestParamDto,
   ) {
     try {
-      const pageExists = await this.pageExists(param.pageId);
-
-      if (!pageExists) throw new NotFoundException('Invalid page ID');
+      const pageId = param.pageId || user.id;
+      const pageExists = await this.pageExists(pageId);
 
       let where: Prisma.PageWhereInput;
       let queryOptions: {
@@ -107,6 +106,11 @@ export class PageService {
     },
   ) {
     try {
+      if (!user.id) {
+        throw new UnauthorizedException(
+          'You are not authorized to create this page.',
+        );
+      }
       let banner = undefined;
 
       if (file.banner) {
@@ -155,9 +159,8 @@ export class PageService {
     },
   ) {
     try {
-      const pageExists = await this.pageExists(param.pageId);
-
-      if (!pageExists) throw new NotFoundException('Invalid page ID');
+      const pageId = param.pageId || user.id;
+      const pageExists = await this.pageExists(pageId);
 
       if (pageExists.ownerId !== user.id)
         throw new UnauthorizedException(
@@ -232,14 +235,17 @@ export class PageService {
     param: DeletePageRequestParamDto,
   ) {
     try {
-      const pageExists = await this.pageExists(param.pageId);
-
-      if (!pageExists) throw new NotFoundException('Invalid page ID');
+      const pageId = param.pageId || user.id;
+      const pageExists = await this.pageExists(pageId);
 
       if (pageExists.ownerId !== user.id)
         throw new UnauthorizedException(
           'You are not authorized to modify this page.',
         );
+
+      if (pageExists.isDefault) {
+        throw new BadRequestException('Default page cannot be deleted.');
+      }
 
       await this.prisma.page.update({
         where: {
@@ -263,11 +269,8 @@ export class PageService {
     param: GetFollowerRequestParamDto,
   ) {
     try {
-      const pageExists = await this.pageExists(param.pageId);
-
-      if (!pageExists) {
-        throw new NotFoundException('Invalid page ID');
-      }
+      const pageId = param.pageId || user.id;
+      const pageExists = await this.pageExists(pageId);
 
       let where: Prisma.PageFollowerWhereInput;
       let queryOptions: {
@@ -332,9 +335,8 @@ export class PageService {
     body: UpdateFollowerRequestBodyDto,
   ) {
     try {
-      const pageExists = await this.pageExists(param.pageId);
-
-      if (!pageExists) throw new NotFoundException('Invalid page ID');
+      const pageId = param.pageId || user.id;
+      const pageExists = await this.pageExists(pageId);
 
       if (pageExists.ownerId !== user.id)
         throw new UnauthorizedException(
@@ -364,9 +366,8 @@ export class PageService {
     param: DeleteFollowerRequestParamDto,
   ) {
     try {
-      const pageExists = await this.pageExists(param.pageId);
-
-      if (!pageExists) throw new NotFoundException('Invalid page ID');
+      const pageId = param.pageId || user.id;
+      const pageExists = await this.pageExists(pageId);
 
       if (pageExists.ownerId !== user.id)
         throw new UnauthorizedException(
@@ -398,9 +399,8 @@ export class PageService {
     param: GetFollowingRequestParamDto,
   ) {
     try {
-      const pageExists = await this.pageExists(param.pageId);
-
-      if (!pageExists) throw new NotFoundException('Invalid page ID');
+      const pageId = param.pageId || user.id;
+      const pageExists = await this.pageExists(pageId);
 
       let where: Prisma.PageFollowerWhereInput;
       let queryOptions: {
@@ -428,10 +428,10 @@ export class PageService {
         };
       } else {
         where = {
-          followingId: pageExists.id,
+          followerId: pageExists.id,
           status: 'ACCEPTED',
           deletedAt: null,
-          followerId: param.followingId,
+          followingId: param.followingId,
         };
         queryOptions = {
           select: {
@@ -462,14 +462,17 @@ export class PageService {
     param: CreateFollowingRequestParamDto,
   ) {
     try {
-      const pageExists = await this.pageExists(param.pageId);
-
-      if (!pageExists) throw new NotFoundException('Invalid page ID');
+      const pageId = param.pageId || user.id;
+      const pageExists = await this.pageExists(pageId);
 
       if (pageExists.ownerId !== user.id)
         throw new UnauthorizedException(
           'You are not authorized to modify this page.',
         );
+
+      if (pageExists.id === param.followingId) {
+        throw new BadRequestException('You cannot follow yourself');
+      }
 
       const existing = await this.prisma.pageFollower.findUnique({
         where: {
@@ -506,9 +509,8 @@ export class PageService {
     param: UpdateFollowingRequestParamDto,
   ) {
     try {
-      const pageExists = await this.pageExists(param.pageId);
-
-      if (!pageExists) throw new NotFoundException('Invalid page ID');
+      const pageId = param.pageId || user.id;
+      const pageExists = await this.pageExists(pageId);
 
       if (pageExists.ownerId !== user.id)
         throw new UnauthorizedException(
@@ -551,9 +553,8 @@ export class PageService {
     param: DeleteFollowingRequestParamDto,
   ) {
     try {
-      const pageExists = await this.pageExists(param.pageId);
-
-      if (!pageExists) throw new NotFoundException('Invalid page ID');
+      const pageId = param.pageId || user.id;
+      const pageExists = await this.pageExists(pageId);
 
       if (pageExists.ownerId !== user.id)
         throw new UnauthorizedException(

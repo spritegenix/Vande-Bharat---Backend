@@ -24,11 +24,12 @@ export class JwtUtil {
 
   async signToken(
     userId: string,
-    email: string,
+    userSlug: string | undefined,
+    credential: string,
     name: string,
   ): Promise<string> {
     try {
-      const payload = { sub: userId, email, name };
+      const payload = { sub: userId, slug: userSlug, credential, name };
       return sign(payload, this.JWT_SECRET, {
         expiresIn: this.JWT_EXPIRATION_TIME,
       });

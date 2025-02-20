@@ -44,12 +44,12 @@ import { JwtGuard } from '../auth/guard';
 import { ZodBodyValidationPipe, ZodParamValidationPipe } from '@app/pipes/zod';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
-@Controller('page')
+@Controller('/page')
 @UseGuards(JwtGuard)
 export class PageController {
   constructor(private readonly pageService: PageService) {}
 
-  @Get(':pageId')
+  @Get('{/:pageId}')
   @UsePipes(new ZodParamValidationPipe(GetPageRequestParamDto))
   @UseInterceptors(new ZodResponseInterceptor(GetPageResponseDto))
   async getPage(
@@ -59,7 +59,7 @@ export class PageController {
     return await this.pageService.getPage(user, param);
   }
 
-  @Post('create')
+  @Post()
   @UsePipes(new ZodBodyValidationPipe(CreatePageRequestBodyDto))
   @UseInterceptors(
     FileFieldsInterceptor([
@@ -80,7 +80,7 @@ export class PageController {
     return await this.pageService.createPage(user, body, files);
   }
 
-  @Put(':pageId')
+  @Put('{/:pageId}')
   @UsePipes(
     new ZodParamValidationPipe(UpdatePageRequestParamDto),
     new ZodBodyValidationPipe(UpdatePageRequestBodyDto),
@@ -105,7 +105,7 @@ export class PageController {
     return await this.pageService.updatePage(user, param, body, files);
   }
 
-  @Delete(':pageId')
+  @Delete('{/:pageId}')
   @UsePipes(new ZodParamValidationPipe(DeletePageRequestParamDto))
   @UseInterceptors(new ZodResponseInterceptor(DeletePageResponseDto))
   async deletePage(
@@ -115,7 +115,7 @@ export class PageController {
     return await this.pageService.deletePage(user, param);
   }
 
-  @Get(':pageId/follower/:followerId')
+  @Get('{/:pageId}/follower{/:followerId}')
   @UsePipes(new ZodParamValidationPipe(GetFollowerRequestParamDto))
   @UseInterceptors(new ZodResponseInterceptor(GetFollowerResponseDto))
   async getFollower(
@@ -125,7 +125,7 @@ export class PageController {
     return await this.pageService.getFollower(user, param);
   }
 
-  @Put(':pageId/follower/:followerId')
+  @Put('{/:pageId}/follower{/:followerId}')
   @UsePipes(
     new ZodParamValidationPipe(UpdateFollowerRequestParamDto),
     new ZodBodyValidationPipe(UpdateFollowerRequestBodyDto),
@@ -139,7 +139,7 @@ export class PageController {
     return await this.pageService.updateFollower(user, param, body);
   }
 
-  @Delete(':pageId/follower/:followerId')
+  @Delete('{/:pageId}/follower{/:followerId}')
   @UsePipes(new ZodParamValidationPipe(DeleteFollowerRequestParamDto))
   @UseInterceptors(new ZodResponseInterceptor(DeleteFollowerResponseDto))
   async deleteFollower(
@@ -149,7 +149,7 @@ export class PageController {
     return await this.pageService.deleteFollower(user, param);
   }
 
-  @Get(':pageId/following/:followingId')
+  @Get('{/:pageId}/following{/:followingId}')
   @UsePipes(new ZodParamValidationPipe(GetFollowingRequestParamDto))
   @UseInterceptors(new ZodResponseInterceptor(GetFollowingRequestParamDto))
   async getFollowing(
@@ -159,7 +159,7 @@ export class PageController {
     return await this.pageService.getFollowing(user, param);
   }
 
-  @Post(':pageId/following/:followingId')
+  @Post('{/:pageId}/following{/:followingId}')
   @UsePipes(new ZodParamValidationPipe(CreateFollowingRequestParamDto))
   @UseInterceptors(new ZodResponseInterceptor(CreateFollowingResponseDto))
   async createFollowing(
@@ -169,7 +169,7 @@ export class PageController {
     return await this.pageService.createFollowing(user, param);
   }
 
-  @Put(':pageId/following/:followingId')
+  @Put('{/:pageId}/following{/:followingId}')
   @UsePipes(new ZodParamValidationPipe(UpdateFollowingRequestParamDto))
   @UseInterceptors(new ZodResponseInterceptor(UpdateFollowingResponseDto))
   async updateFollowing(
@@ -179,7 +179,7 @@ export class PageController {
     return await this.pageService.updateFollowing(user, param);
   }
 
-  @Delete(':pageId/following/:followingId')
+  @Delete('{/:pageId}/following{/:followingId}')
   @UsePipes(new ZodParamValidationPipe(DeleteFollowingRequestParamDto))
   @UseInterceptors(new ZodResponseInterceptor(DeleteFollowingResponseDto))
   async deleteFollowing(

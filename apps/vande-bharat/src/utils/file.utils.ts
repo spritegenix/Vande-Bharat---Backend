@@ -152,7 +152,8 @@ export class FileUtil {
       await cloudinary.uploader.destroy(publicId, {
         resource_type: 'image',
       });
-    } catch {
+    } catch (error) {
+      console.error(error);
       return;
     }
   }

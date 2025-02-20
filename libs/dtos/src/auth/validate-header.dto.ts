@@ -19,9 +19,12 @@ export const ValidateHeaderPayloadDto = z.object({
 export type ValidateHeaderPayloadDto = z.infer<typeof ValidateHeaderPayloadDto>;
 
 // ✅ Validate Token Response Schema (Zod)
-export const ValidateHeaderResponseDto = z.object({
-  id: z.string(),
-});
+export const ValidateHeaderResponseDto = z
+  .object({
+    id: z.string().optional(),
+    slug: z.string().optional(),
+  })
+  .optional();
 
 // ✅ TypeScript Type Inference for Response DTO
 export type ValidateHeaderResponseDto = z.infer<
