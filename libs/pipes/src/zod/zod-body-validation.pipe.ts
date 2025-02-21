@@ -1,4 +1,5 @@
 // import { Logger } from '@app/logger';
+import { Logger } from '@app/logger';
 import {
   ArgumentMetadata,
   BadRequestException,
@@ -12,8 +13,10 @@ import { ZodSchema, ZodError } from 'zod';
 export class ZodBodyValidationPipe<T> implements PipeTransform<unknown, T> {
   constructor(
     private schema: ZodSchema<T>,
-    private debug: boolean = false,
+    private debug: boolean = process.env.DEBUG === 'true',
   ) {}
+
+  private logger = new Logger();
 
   transform(value: unknown, metadata: ArgumentMetadata): T {
     // const logger = new Logger();
@@ -32,7 +35,7 @@ export class ZodBodyValidationPipe<T> implements PipeTransform<unknown, T> {
 
         if (!result.success) {
           if (this.debug) {
-            console.error(
+            this.logger.error(
               'Validation Error:',
               JSON.stringify(this.formatErrors(result.error), null, 2),
             );

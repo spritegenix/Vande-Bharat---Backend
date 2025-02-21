@@ -33,7 +33,9 @@ export const CreateFollowingResponseDto = z
     (
       { pageFollowerHistory, ...rest }, // eslint-disable-line @typescript-eslint/no-unused-vars
     ) => rest,
-  );
+  )
+  .nullable()
+  .optional();
 
 // ✅ TypeScript Type for Response
 export type CreateFollowingResponseDto = z.infer<

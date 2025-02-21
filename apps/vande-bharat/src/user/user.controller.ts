@@ -26,7 +26,7 @@ export class UserController {
 
   @Get('{/:userId}')
   @UsePipes(new ZodParamValidationPipe(GetUserRequestParamDto))
-  @UseInterceptors(new ZodResponseInterceptor(GetUserResponseDto, true))
+  @UseInterceptors(new ZodResponseInterceptor(GetUserResponseDto))
   async getUser(
     @GetUser() user: ValidateHeaderResponseDto,
     @Param() param: GetUserRequestParamDto,
@@ -36,7 +36,7 @@ export class UserController {
 
   @Get('{/:userId}/credential{/:credentialId}')
   @UsePipes(new ZodParamValidationPipe(GetCredentialRequestParamDto))
-  @UseInterceptors(new ZodResponseInterceptor(GetCredentialResponseDto, true))
+  @UseInterceptors(new ZodResponseInterceptor(GetCredentialResponseDto))
   async getCredential(
     @GetUser() user: ValidateHeaderResponseDto,
     @Param() param: GetCredentialRequestParamDto,

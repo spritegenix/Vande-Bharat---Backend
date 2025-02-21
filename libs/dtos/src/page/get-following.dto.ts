@@ -15,7 +15,7 @@ export const GetFollowingRequestParamDto = z.object({
     .trim() // First trim to clean the string
     .min(1, 'Page ID is required'), // Ensure it's not empty
 
-  followingId: z.string().trim().min(1, 'Page Follower ID is required'),
+  followingId: z.string().trim().optional(),
 });
 
 // ✅ TypeScript Type Inference
@@ -34,7 +34,9 @@ export const GetFollowingResponseDto = z
       { pageFollowerHistory, ...rest }, // eslint-disable-line @typescript-eslint/no-unused-vars
     ) => rest,
   )
-  .array();
+  .array()
+  .nullable()
+  .optional();
 
 // ✅ TypeScript Type for Response
 export type GetFollowingResponseDto = z.infer<typeof GetFollowingResponseDto>;

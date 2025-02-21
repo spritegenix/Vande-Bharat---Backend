@@ -33,7 +33,6 @@ export class ErrorUtil {
   };
 
   handleError(error: any) {
-    console.error('Error:', error);
     // Handle Prisma Errors using PrismaExceptions dynamically
     if (error instanceof PrismaClientKnownRequestError) {
       const mappedError = ErrorUtil.prismaErrorMap[error.code];

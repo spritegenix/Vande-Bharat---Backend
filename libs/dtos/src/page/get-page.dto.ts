@@ -24,7 +24,9 @@ export const GetPageResponseDto = z
     (
       { pageHistory, ...rest }, // eslint-disable-line @typescript-eslint/no-unused-vars
     ) => rest,
-  );
+  )
+  .nullable()
+  .optional();
 
 // ✅ TypeScript Type for Response
 export type GetPageResponseDto = z.infer<typeof GetPageResponseDto>;

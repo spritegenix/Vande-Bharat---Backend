@@ -5,20 +5,19 @@ import {
   Injectable,
   PipeTransform,
 } from '@nestjs/common';
+import { Logger } from 'winston';
 import { ZodSchema, ZodError } from 'zod';
 
 @Injectable()
 export class ZodParamValidationPipe<T> implements PipeTransform<unknown, T> {
   constructor(
     private schema: ZodSchema<T>,
-    private debug: boolean = false,
+    private debug: boolean = process.env.DEBUG === 'true',
   ) {}
 
-  transform(value: unknown, metadata: ArgumentMetadata): T {
-    // const logger = new Logger();
-    // logger.warn('value', JSON.stringify(value));
-    // logger.warn('metadata', JSON.stringify(metadata));
+  private logger = new Logger();
 
+  transform(value: unknown, metadata: ArgumentMetadata): T {
     // Return early if value is undefined or null and we're not validating body
     if ((value === undefined || value === null) && metadata.type !== 'param') {
       return value as T;
@@ -31,7 +30,7 @@ export class ZodParamValidationPipe<T> implements PipeTransform<unknown, T> {
 
         if (!result.success) {
           if (this.debug) {
-            console.error(
+            this.logger.error(
               'Validation Error:',
               JSON.stringify(this.formatErrors(result.error), null, 2),
             );

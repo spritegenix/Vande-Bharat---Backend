@@ -23,6 +23,8 @@ export const GetUserResponseDto = z
     (
       { hash, ipAddress, userHistory, ...rest }, // eslint-disable-line @typescript-eslint/no-unused-vars
     ) => rest,
-  );
+  )
+  .nullable()
+  .optional();
 
 export type GetUserResponseDto = z.infer<typeof GetUserResponseDto>;

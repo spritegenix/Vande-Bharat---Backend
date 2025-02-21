@@ -4,6 +4,7 @@ import {
   Delete,
   Get,
   Param,
+  Patch,
   Post,
   Put,
   UploadedFiles,
@@ -38,6 +39,7 @@ import {
   UpdatePageRequestParamDto,
   UpdatePageResponseDto,
   ValidateHeaderResponseDto,
+  GetFollowingResponseDto,
 } from '@app/dtos';
 import { GetUser } from '../auth/decorator';
 import { JwtGuard } from '../auth/guard';
@@ -80,7 +82,7 @@ export class PageController {
     return await this.pageService.createPage(user, body, files);
   }
 
-  @Put('{/:pageId}')
+  @Patch('{/:pageId}')
   @UsePipes(
     new ZodParamValidationPipe(UpdatePageRequestParamDto),
     new ZodBodyValidationPipe(UpdatePageRequestBodyDto),
@@ -125,7 +127,7 @@ export class PageController {
     return await this.pageService.getFollower(user, param);
   }
 
-  @Put('{/:pageId}/follower{/:followerId}')
+  @Patch('{/:pageId}/follower{/:followerId}')
   @UsePipes(
     new ZodParamValidationPipe(UpdateFollowerRequestParamDto),
     new ZodBodyValidationPipe(UpdateFollowerRequestBodyDto),
@@ -151,7 +153,7 @@ export class PageController {
 
   @Get('{/:pageId}/following{/:followingId}')
   @UsePipes(new ZodParamValidationPipe(GetFollowingRequestParamDto))
-  @UseInterceptors(new ZodResponseInterceptor(GetFollowingRequestParamDto))
+  @UseInterceptors(new ZodResponseInterceptor(GetFollowingResponseDto))
   async getFollowing(
     @GetUser() user: ValidateHeaderResponseDto,
     @Param() param: GetFollowingRequestParamDto,

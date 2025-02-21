@@ -24,9 +24,12 @@ export type DeleteFollowingRequestParamDto = z.infer<
 >;
 
 // ✅ Signup Response Schema (Zod)
-export const DeleteFollowingResponseDto = z.object({
-  message: z.string().nullable().optional(),
-});
+export const DeleteFollowingResponseDto = z
+  .object({
+    message: z.string().nullable().optional(),
+  })
+  .nullable()
+  .optional();
 
 // ✅ TypeScript Type for Response
 export type DeleteFollowingResponseDto = z.infer<

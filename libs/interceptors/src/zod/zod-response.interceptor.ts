@@ -1,3 +1,4 @@
+import { Logger } from '@app/logger';
 import {
   CallHandler,
   ExecutionContext,
@@ -6,7 +7,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
-import { map, catchError } from 'rxjs';
+import { map } from 'rxjs';
 import { ZodSchema, ZodError } from 'zod';
 
 @Injectable()
@@ -15,6 +16,8 @@ export class ZodResponseInterceptor<T> implements NestInterceptor<unknown, T> {
     private schema: ZodSchema<T>,
     private debug: boolean = false,
   ) {}
+
+  private logger = new Logger();
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<T> {
     return next.handle().pipe(
@@ -25,7 +28,7 @@ export class ZodResponseInterceptor<T> implements NestInterceptor<unknown, T> {
 
           if (!result.success) {
             if (this.debug) {
-              console.error(
+              this.logger.error(
                 'Zod Response Validation Error:',
                 JSON.stringify(this.formatErrors(result.error), null, 2),
               );
@@ -43,12 +46,6 @@ export class ZodResponseInterceptor<T> implements NestInterceptor<unknown, T> {
           }
           throw new InternalServerErrorException('Response validation failed');
         }
-      }),
-      catchError((error) => {
-        if (this.debug) {
-          console.error('Response Interceptor Error:', error);
-        }
-        throw error;
       }),
     );
   }

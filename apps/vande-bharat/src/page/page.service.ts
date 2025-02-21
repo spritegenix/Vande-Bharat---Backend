@@ -220,6 +220,8 @@ export class PageService {
             },
           });
         }
+
+        console.log(page);
         return {
           ...page,
           message: 'Page updated successfully',
@@ -271,6 +273,9 @@ export class PageService {
     try {
       const pageId = param.pageId || user.id;
       const pageExists = await this.pageExists(pageId);
+      const followerExists = param.followerId
+        ? await this.pageExists(param.followerId)
+        : undefined;
 
       let where: Prisma.PageFollowerWhereInput;
       let queryOptions: {
@@ -282,7 +287,7 @@ export class PageService {
         where = {
           followingId: pageExists.id,
           deletedAt: null,
-          followerId: param.followerId,
+          followerId: followerExists?.id,
         };
         queryOptions = {
           include: {
@@ -301,7 +306,7 @@ export class PageService {
           followingId: pageExists.id,
           status: 'ACCEPTED',
           deletedAt: null,
-          followerId: param.followerId,
+          followerId: followerExists?.id,
         };
         queryOptions = {
           select: {
@@ -343,15 +348,18 @@ export class PageService {
           'You are not authorized to modify this page.',
         );
 
+      const followerExists = await this.pageExists(param.followerId);
+
       const pageFollower = await this.prisma.pageFollower.update({
         where: {
           followerId_followingId: {
-            followerId: param.followerId,
+            followerId: followerExists.id,
             followingId: pageExists.id,
           },
         },
         data: {
           status: body.status,
+          statusUpdatedAt: new Date(),
         },
       });
 
@@ -374,15 +382,20 @@ export class PageService {
           'You are not authorized to modify this page.',
         );
 
+      const followerExists = await this.pageExists(param.followerId);
+
       await this.prisma.pageFollower.update({
         where: {
           followerId_followingId: {
-            followerId: param.followerId,
+            followerId: followerExists.id,
             followingId: pageExists.id,
           },
+          deletedAt: null,
         },
         data: {
           deletedAt: new Date(),
+          status: 'REJECTED',
+          statusUpdatedAt: new Date(),
         },
       });
 
@@ -401,6 +414,9 @@ export class PageService {
     try {
       const pageId = param.pageId || user.id;
       const pageExists = await this.pageExists(pageId);
+      const followingExists = param.followingId
+        ? await this.pageExists(param.followingId)
+        : undefined;
 
       let where: Prisma.PageFollowerWhereInput;
       let queryOptions: {
@@ -411,8 +427,8 @@ export class PageService {
       if (pageExists.ownerId === user.id) {
         where = {
           followerId: pageExists.id,
+          followingId: followingExists?.id,
           deletedAt: null,
-          followingId: param.followingId,
         };
         queryOptions = {
           include: {
@@ -431,7 +447,7 @@ export class PageService {
           followerId: pageExists.id,
           status: 'ACCEPTED',
           deletedAt: null,
-          followingId: param.followingId,
+          followingId: followingExists?.id,
         };
         queryOptions = {
           select: {
@@ -448,10 +464,12 @@ export class PageService {
         };
       }
 
-      return await this.prisma.pageFollower.findFirst({
+      const data = await this.prisma.pageFollower.findMany({
         where,
         ...queryOptions,
       });
+
+      return data;
     } catch (error) {
       this.errorUtil.handleError(error);
     }
@@ -470,7 +488,9 @@ export class PageService {
           'You are not authorized to modify this page.',
         );
 
-      if (pageExists.id === param.followingId) {
+      const followingExists = await this.pageExists(param.followingId);
+
+      if (pageExists.id === followingExists.id) {
         throw new BadRequestException('You cannot follow yourself');
       }
 
@@ -478,25 +498,38 @@ export class PageService {
         where: {
           followerId_followingId: {
             followerId: pageExists.id,
-            followingId: param.followingId,
+            followingId: followingExists.id,
           },
+          deletedAt: null,
         },
       });
+
       if (existing?.status === 'ACCEPTED') {
         throw new BadRequestException('Already following');
       }
 
+      if (existing?.status === 'PENDING') {
+        return existing;
+      }
+
       return await this.prisma.pageFollower.upsert({
         where: {
-          id: existing?.id,
+          followerId_followingId: {
+            followerId: pageExists.id,
+            followingId: followingExists.id,
+          },
         },
         update: {
           status: 'PENDING',
+          deletedAt: null,
+          statusUpdatedAt: null,
         },
         create: {
-          followerId: user.id,
-          followingId: pageExists.id,
+          followerId: pageExists.id,
+          followingId: followingExists.id,
           status: 'PENDING',
+          deletedAt: null,
+          statusUpdatedAt: null,
         },
       });
     } catch (error) {
@@ -517,30 +550,48 @@ export class PageService {
           'You are not authorized to modify this page.',
         );
 
+      const followingExists = await this.pageExists(param.followingId);
+
+      if (pageExists.id === followingExists.id) {
+        throw new BadRequestException('You cannot follow yourself');
+      }
+
       const existing = await this.prisma.pageFollower.findUnique({
         where: {
           followerId_followingId: {
             followerId: pageExists.id,
-            followingId: param.followingId,
+            followingId: followingExists.id,
           },
+          deletedAt: null,
         },
       });
+
       if (existing?.status === 'ACCEPTED') {
         throw new BadRequestException('Already following');
       }
+
+      if (existing?.status === 'PENDING') {
+        return existing;
+      }
+
       return await this.prisma.pageFollower.upsert({
         where: {
-          id: existing?.id,
+          followerId_followingId: {
+            followerId: pageExists.id,
+            followingId: followingExists.id,
+          },
         },
         update: {
           status: 'PENDING',
           deletedAt: null,
+          statusUpdatedAt: null,
         },
         create: {
-          followerId: user.id,
-          followingId: pageExists.id,
+          followerId: pageExists.id,
+          followingId: followingExists.id,
           status: 'PENDING',
           deletedAt: null,
+          statusUpdatedAt: null,
         },
       });
     } catch (error) {
@@ -561,12 +612,15 @@ export class PageService {
           'You are not authorized to modify this page.',
         );
 
+      const followingExists = await this.pageExists(param.followingId);
+
       await this.prisma.pageFollower.update({
         where: {
           followerId_followingId: {
             followerId: pageExists.id,
-            followingId: param.followingId,
+            followingId: followingExists.id,
           },
+          deletedAt: null,
         },
         data: {
           deletedAt: new Date(),
@@ -586,7 +640,7 @@ export class PageService {
       const page = await this.prisma.page.findFirst({
         where: { OR: [{ id }, { slug: id }] },
       });
-      if (!page) throw new NotFoundException('Page not found');
+      if (!page) throw new NotFoundException(`Page ${id} not found`);
       return page;
     } catch (error) {
       this.errorUtil.handleError(error);

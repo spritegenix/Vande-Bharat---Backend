@@ -17,9 +17,12 @@ export type DeletePageRequestParamDto = z.infer<
 >;
 
 // ✅ Signup Response Schema (Zod)
-export const DeletePageResponseDto = z.object({
-  message: z.string().nullable().optional(),
-});
+export const DeletePageResponseDto = z
+  .object({
+    message: z.string().nullable().optional(),
+  })
+  .nullable()
+  .optional();
 
 // ✅ TypeScript Type for Response
 export type DeletePageResponseDto = z.infer<typeof DeletePageResponseDto>;

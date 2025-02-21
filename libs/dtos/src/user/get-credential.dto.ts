@@ -27,6 +27,8 @@ export const GetCredentialResponseDto = z
       { otp, otpExpiresAt, ...rest }, // eslint-disable-line @typescript-eslint/no-unused-vars
     ) => rest,
   )
-  .array();
+  .array()
+  .nullable()
+  .optional();
 // Correctly infer the type of CredentialMeResponseDto
 export type GetCredentialResponseDto = z.infer<typeof GetCredentialResponseDto>;

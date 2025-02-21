@@ -22,35 +22,35 @@ export class AuthController {
 
   @MessagePattern({ cmd: 'auth_signup' })
   @UsePipes(new ZodBodyValidationPipe(SignupPayloadDto))
-  @UseInterceptors(new ZodResponseInterceptor(SignupResponseDto, true))
+  @UseInterceptors(new ZodResponseInterceptor(SignupResponseDto))
   async signup(@Payload() payload: SignupPayloadDto) {
     return await this.authService.signup(payload);
   }
 
   @MessagePattern({ cmd: 'auth_verify_otp' })
   @UsePipes(new ZodBodyValidationPipe(VerifyOtpPayloadDto))
-  @UseInterceptors(new ZodResponseInterceptor(VerifyOtpResponseDto, true))
+  @UseInterceptors(new ZodResponseInterceptor(VerifyOtpResponseDto))
   async verifyOtp(@Payload() payload: VerifyOtpPayloadDto) {
     return await this.authService.verifyOtp(payload);
   }
 
   @MessagePattern({ cmd: 'auth_login' })
   @UsePipes(new ZodBodyValidationPipe(LoginPayloadDto))
-  @UseInterceptors(new ZodResponseInterceptor(LoginResponseDto, true))
+  @UseInterceptors(new ZodResponseInterceptor(LoginResponseDto))
   async login(@Payload() payload: LoginPayloadDto) {
     return await this.authService.login(payload);
   }
 
   @MessagePattern({ cmd: 'auth_validate_header' })
   @UsePipes(new ZodBodyValidationPipe(ValidateHeaderPayloadDto))
-  @UseInterceptors(new ZodResponseInterceptor(ValidateHeaderResponseDto, true))
+  @UseInterceptors(new ZodResponseInterceptor(ValidateHeaderResponseDto))
   async validateHeader(@Payload() payload: ValidateHeaderPayloadDto) {
     return await this.authService.validateHeader(payload);
   }
 
   @MessagePattern({ cmd: 'auth_add_credential' })
   @UsePipes(new ZodBodyValidationPipe(AddCredentialPayloadDto))
-  @UseInterceptors(new ZodResponseInterceptor(AddCredentialResponseDto, true))
+  @UseInterceptors(new ZodResponseInterceptor(AddCredentialResponseDto))
   async addCredential(
     @Payload()
     payload: AddCredentialPayloadDto,

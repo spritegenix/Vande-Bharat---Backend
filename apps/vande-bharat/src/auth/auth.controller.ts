@@ -30,21 +30,21 @@ export class AuthController {
 
   @Post('signup')
   @UsePipes(new ZodBodyValidationPipe(SignupRequestBodyDto))
-  @UseInterceptors(new ZodResponseInterceptor(SignupResponseDto, true))
+  @UseInterceptors(new ZodResponseInterceptor(SignupResponseDto))
   async signup(@Body() body: SignupRequestBodyDto) {
     return await this.authService.signup(body);
   }
 
   @Post('verify-otp')
   @UsePipes(new ZodBodyValidationPipe(VerifyOtpRequestBodyDto))
-  @UseInterceptors(new ZodResponseInterceptor(VerifyOtpResponseDto, true))
+  @UseInterceptors(new ZodResponseInterceptor(VerifyOtpResponseDto))
   async verifyOtp(@Body() body: VerifyOtpRequestBodyDto) {
     return await this.authService.verifyOtp(body);
   }
 
   @Get('login')
   @UsePipes(new ZodBodyValidationPipe(LoginRequestBodyDto))
-  @UseInterceptors(new ZodResponseInterceptor(LoginResponseDto, true))
+  @UseInterceptors(new ZodResponseInterceptor(LoginResponseDto))
   async login(@Body() body: LoginRequestBodyDto) {
     return await this.authService.login(body);
   }
@@ -52,7 +52,7 @@ export class AuthController {
   @Post('add-credential')
   @UseGuards(JwtGuard)
   @UsePipes(new ZodBodyValidationPipe(AddCredentialRequestBodyDto))
-  @UseInterceptors(new ZodResponseInterceptor(AddCredentialResponseDto, true))
+  @UseInterceptors(new ZodResponseInterceptor(AddCredentialResponseDto))
   async addCredential(
     @Body() body: AddCredentialRequestBodyDto, // This should only contain phone
     @GetUser() user: ValidateHeaderResponseDto, // This gets the JWT data from req.user
