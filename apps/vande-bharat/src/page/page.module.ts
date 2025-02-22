@@ -2,13 +2,13 @@ import { Module } from '@nestjs/common';
 import { PageController } from './page.controller';
 import { PageService } from './page.service';
 import { AuthModule } from '../auth/auth.module';
-import { ErrorUtil, FileUtil } from '../utils';
-import { PrismaService } from '@app/prisma';
+import { CursorUtil, ErrorUtil, FileUtil, NotificationUtil } from '../utils';
+import { PrismaModule, PrismaService } from '@app/prisma';
 import { SlugUtil } from './utils';
 import { Logger } from '@app/logger';
 
 @Module({
-  imports: [AuthModule],
+  imports: [AuthModule, PrismaModule],
   controllers: [PageController],
   providers: [
     PageService,
@@ -16,7 +16,9 @@ import { Logger } from '@app/logger';
     PrismaService,
     SlugUtil,
     FileUtil,
+    NotificationUtil,
     Logger,
+    CursorUtil,
   ],
   exports: [PageService],
 })

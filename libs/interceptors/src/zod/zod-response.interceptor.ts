@@ -14,7 +14,7 @@ import { ZodSchema, ZodError } from 'zod';
 export class ZodResponseInterceptor<T> implements NestInterceptor<unknown, T> {
   constructor(
     private schema: ZodSchema<T>,
-    private debug: boolean = false,
+    private debug: boolean = process.env.DEBUG === 'true',
   ) {}
 
   private logger = new Logger();
@@ -29,8 +29,9 @@ export class ZodResponseInterceptor<T> implements NestInterceptor<unknown, T> {
           if (!result.success) {
             if (this.debug) {
               this.logger.error(
-                'Zod Response Validation Error:',
-                JSON.stringify(this.formatErrors(result.error), null, 2),
+                result.error.issues.map((issue) => issue.message).join(', '),
+                JSON.stringify(result.error, null, 2),
+                result.error.name,
               );
             }
             throw new InternalServerErrorException({

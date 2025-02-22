@@ -13,12 +13,32 @@ model User {
   deletedAt DateTime?
 
   credentials Credential[]
+  devices     Device[]
   ipAddresses IpAddress[]
   pages       Page[]
   reports     Report[]
   userHistory UserHistory[]
 
   @@map("users")
+}
+
+model Device {
+  id          String     @id @default(uuid())
+  userId      String
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token       String     @unique // Push notification token
+  platform    String // 'ios', 'android', 'web'
+  ipAddress   IpAddress? @relation(fields: [ipAddressId], references: [id])
+  ipAddressId String?
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  deviceHistory DeviceHistory[]
+
+  @@index([userId])
+  @@map("devices")
 }
 
 model IpAddress {
@@ -34,6 +54,7 @@ model IpAddress {
   userId String
   user   User   @relation(fields: [userId], references: [id])
 
+  devices          Device[] // One IP can be linked to multiple devices
   ipAddressHistory IpAddressHistory[]
 
   @@index([userId])
@@ -81,6 +102,22 @@ model UserHistory {
   user User @relation(fields: [userId], references: [id])
 
   @@map("user_histories")
+}
+
+model DeviceHistory {
+  id        String  @id @default(uuid())
+  deviceId  String
+  token     String?
+  platform  String?
+  ipAddress String? // Store previous IPs in history
+
+  createdAt DateTime? @default(now())
+  updatedAt DateTime? @updatedAt
+  deletedAt DateTime?
+
+  device Device @relation(fields: [deviceId], references: [id])
+
+  @@map("device_histories")
 }
 
 model IpAddressHistory {

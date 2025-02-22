@@ -4,10 +4,11 @@ import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
-import { ErrorUtil, FileUtil } from './utils';
+import { CursorUtil, ErrorUtil, FileUtil, NotificationUtil } from './utils';
 import { PageModule } from './page/page.module';
 import { Logger, LoggerModule } from '@app/logger';
 import { LoggerMiddleware } from './logger/logger.middleware';
+import { NotificationModule } from './notification/notification.module';
 
 @Module({
   imports: [
@@ -18,9 +19,17 @@ import { LoggerMiddleware } from './logger/logger.middleware';
       isGlobal: true, // ✅ Makes ConfigService available across the app
     }),
     PageModule,
+    NotificationModule,
   ],
   controllers: [AppController],
-  providers: [AppService, ErrorUtil, FileUtil, Logger],
+  providers: [
+    AppService,
+    ErrorUtil,
+    NotificationUtil,
+    FileUtil,
+    Logger,
+    CursorUtil,
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

@@ -31,8 +31,9 @@ export class ZodParamValidationPipe<T> implements PipeTransform<unknown, T> {
         if (!result.success) {
           if (this.debug) {
             this.logger.error(
-              'Validation Error:',
-              JSON.stringify(this.formatErrors(result.error), null, 2),
+              result.error.issues.map((issue) => issue.message).join(', '),
+              JSON.stringify(result.error, null, 2),
+              result.error.name,
             );
           }
           throw new BadRequestException({

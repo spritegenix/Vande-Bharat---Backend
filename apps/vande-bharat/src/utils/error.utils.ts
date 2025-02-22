@@ -2,9 +2,12 @@ import * as Exception from '@nestjs/common/exceptions';
 import { Injectable } from '@nestjs/common';
 import { RpcException } from '@nestjs/microservices';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import { Logger } from '@app/logger';
 
 @Injectable()
 export class ErrorUtil {
+  private debug: boolean = process.env.DEBUG === 'true';
+  private logger = new Logger();
   private static readonly httpExceptions: Record<number, any> = (() => {
     return Object.keys(Exception)
       .filter((key) => key.endsWith('Exception'))
@@ -33,6 +36,14 @@ export class ErrorUtil {
   };
 
   handleError(error: any) {
+    if (this.debug) {
+      this.logger.error(
+        error.message,
+        JSON.stringify(error, null, 2),
+        error.name,
+      );
+    }
+
     // Handle Prisma Errors using PrismaExceptions dynamically
     if (error instanceof PrismaClientKnownRequestError) {
       const mappedError = ErrorUtil.prismaErrorMap[error.code];

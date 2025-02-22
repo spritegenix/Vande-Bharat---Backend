@@ -49,6 +49,7 @@ model Page {
     pageHistory PageHistory[]
 
     @@index([ownerId])
+    @@index([id])
     @@index([slug])
     @@map("pages")
 }
@@ -70,6 +71,7 @@ model PageFollower {
     pageFollowerHistory PageFollowerHistory[]
 
     @@unique([followerId, followingId])
+    @@index([id])
     @@index([followerId])
     @@index([followingId])
     @@map("page_followers")
@@ -102,6 +104,7 @@ model PageHistory {
     page Page @relation(fields: [pageId], references: [id])
 
     @@index([pageId])
+    @@index([id])
     @@map("page_histories")
 }
 
@@ -121,6 +124,7 @@ model PageFollowerHistory {
     pageFollower PageFollower @relation(fields: [pageFollowerId], references: [id])
 
     @@index([pageFollowerId])
+    @@index([id])
     @@map("page_follower_histories")
 }
 

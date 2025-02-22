@@ -34,10 +34,12 @@ export class ZodBodyValidationPipe<T> implements PipeTransform<unknown, T> {
         const result = this.schema.safeParse(value);
 
         if (!result.success) {
+          console.log(JSON.stringify(result.error, null, 2));
           if (this.debug) {
             this.logger.error(
-              'Validation Error:',
-              JSON.stringify(this.formatErrors(result.error), null, 2),
+              result.error.issues.map((issue) => issue.message).join(', '),
+              JSON.stringify(result.error, null, 2),
+              result.error.name,
             );
           }
           throw new BadRequestException({

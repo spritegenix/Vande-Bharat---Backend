@@ -5,7 +5,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-import { ErrorUtil, FileUtil } from '../utils';
+import { CursorUtil, ErrorUtil, FileUtil, NotificationUtil } from '../utils';
 import {
   CreateFollowingRequestParamDto,
   CreatePageRequestBodyDto,
@@ -13,7 +13,9 @@ import {
   DeleteFollowingRequestParamDto,
   DeletePageRequestParamDto,
   GetFollowerRequestParamDto,
+  GetFollowerRequestQueryDto,
   GetFollowingRequestParamDto,
+  GetFollowingRequestQueryDto,
   GetPageRequestParamDto,
   UpdateFollowerRequestBodyDto,
   UpdateFollowerRequestParamDto,
@@ -33,6 +35,8 @@ export class PageService {
     private readonly errorUtil: ErrorUtil,
     private readonly slugUtil: SlugUtil,
     private readonly fileUtil: FileUtil,
+    private readonly notificationUtil: NotificationUtil,
+    private readonly cursorUtil: CursorUtil,
   ) {}
 
   async getPage(
@@ -43,14 +47,13 @@ export class PageService {
       const pageId = param.pageId || user.id;
       const pageExists = await this.pageExists(pageId);
 
-      let where: Prisma.PageWhereInput;
+      const where: Prisma.PageWhereInput = { id: pageExists.id };
       let queryOptions: {
         include?: Prisma.PageInclude;
         select?: Prisma.PageSelect;
       };
 
       if (pageExists.ownerId === user.id) {
-        where = { id: pageExists.id };
         queryOptions = {
           include: {
             categories: { where: { deletedAt: null } },
@@ -65,11 +68,8 @@ export class PageService {
           },
         };
       } else {
-        where = {
-          id: pageExists.id,
-          isHidden: false,
-          isBlocked: false,
-        };
+        where.isHidden = false;
+        where.isBlocked = false;
         queryOptions = {
           select: {
             id: true,
@@ -82,6 +82,7 @@ export class PageService {
             isVerified: true,
             followerCount: true,
             postCount: true,
+            privacy: true,
           },
         };
       }
@@ -221,7 +222,6 @@ export class PageService {
           });
         }
 
-        console.log(page);
         return {
           ...page,
           message: 'Page updated successfully',
@@ -269,6 +269,7 @@ export class PageService {
   async getFollower(
     user: ValidateHeaderResponseDto,
     param: GetFollowerRequestParamDto,
+    query: GetFollowerRequestQueryDto,
   ) {
     try {
       const pageId = param.pageId || user.id;
@@ -277,18 +278,26 @@ export class PageService {
         ? await this.pageExists(param.followerId)
         : undefined;
 
-      let where: Prisma.PageFollowerWhereInput;
+      const where: Prisma.PageFollowerWhereInput = {
+        followingId: pageExists.id,
+        deletedAt: null,
+        followerId: followerExists?.id,
+        follower: !followerExists?.id
+          ? {
+              name: {
+                contains: query.search,
+                mode: 'insensitive',
+              },
+              deletedAt: null,
+            }
+          : undefined,
+      };
       let queryOptions: {
         include?: Prisma.PageFollowerInclude;
         select?: Prisma.PageFollowerSelect;
       };
 
       if (pageExists.ownerId === user.id) {
-        where = {
-          followingId: pageExists.id,
-          deletedAt: null,
-          followerId: followerExists?.id,
-        };
         queryOptions = {
           include: {
             follower: {
@@ -302,12 +311,7 @@ export class PageService {
           },
         };
       } else {
-        where = {
-          followingId: pageExists.id,
-          status: 'ACCEPTED',
-          deletedAt: null,
-          followerId: followerExists?.id,
-        };
+        where.status = 'ACCEPTED';
         queryOptions = {
           select: {
             id: true,
@@ -323,12 +327,31 @@ export class PageService {
         };
       }
 
-      const followers = await this.prisma.pageFollower.findMany({
+      const {
+        cursor,
+        limit = 10,
+        orderBy = 'createdAt',
+        orderDirection = 'desc',
+      } = query;
+
+      const cursorObj = this.cursorUtil.buildCursorObject(cursor, orderBy);
+
+      const follower = await this.prisma.pageFollower.findMany({
         where,
         ...queryOptions,
+        take: limit,
+        skip: cursor ? 1 : 0,
+        cursor: cursorObj,
+        orderBy: { [orderBy]: orderDirection },
       });
 
-      return followers;
+      const nextCursor = this.cursorUtil.getNextCursor(
+        follower,
+        limit,
+        orderBy,
+      );
+
+      return { follower, nextCursor };
     } catch (error) {
       this.errorUtil.handleError(error);
     }
@@ -363,6 +386,22 @@ export class PageService {
         },
       });
 
+      this.notificationUtil.createOrUpdateNotification(
+        pageFollower.id,
+        followerExists.id,
+        'FOLLOW',
+        {
+          pageId: pageExists.id,
+          pageSlug: pageExists.slug,
+          pageName: pageExists.name,
+          pageAvatar: pageExists.avatar,
+          message:
+            pageExists.name +
+            ` has ${pageFollower.status.toLocaleLowerCase()}ed your follow request.`,
+        },
+        null,
+      );
+
       return { ...pageFollower, message: 'Page follower updated successfully' };
     } catch (error) {
       this.errorUtil.handleError(error);
@@ -384,7 +423,7 @@ export class PageService {
 
       const followerExists = await this.pageExists(param.followerId);
 
-      await this.prisma.pageFollower.update({
+      const pageFollower = await this.prisma.pageFollower.update({
         where: {
           followerId_followingId: {
             followerId: followerExists.id,
@@ -399,6 +438,11 @@ export class PageService {
         },
       });
 
+      this.notificationUtil.deleteNotification(
+        pageFollower.id,
+        followerExists.id,
+      );
+
       return {
         message: 'Page follower deleted successfully',
       };
@@ -410,6 +454,7 @@ export class PageService {
   async getFollowing(
     user: ValidateHeaderResponseDto,
     param: GetFollowingRequestParamDto,
+    query: GetFollowingRequestQueryDto,
   ) {
     try {
       const pageId = param.pageId || user.id;
@@ -418,18 +463,26 @@ export class PageService {
         ? await this.pageExists(param.followingId)
         : undefined;
 
-      let where: Prisma.PageFollowerWhereInput;
+      const where: Prisma.PageFollowerWhereInput = {
+        followerId: pageExists.id,
+        deletedAt: null,
+        followingId: followingExists?.id,
+        following: !followingExists?.id
+          ? {
+              name: {
+                contains: query.search,
+                mode: 'insensitive',
+              },
+              deletedAt: null,
+            }
+          : null,
+      };
       let queryOptions: {
         include?: Prisma.PageFollowerInclude;
         select?: Prisma.PageFollowerSelect;
       };
 
       if (pageExists.ownerId === user.id) {
-        where = {
-          followerId: pageExists.id,
-          followingId: followingExists?.id,
-          deletedAt: null,
-        };
         queryOptions = {
           include: {
             following: {
@@ -443,16 +496,11 @@ export class PageService {
           },
         };
       } else {
-        where = {
-          followerId: pageExists.id,
-          status: 'ACCEPTED',
-          deletedAt: null,
-          followingId: followingExists?.id,
-        };
+        where.status = 'ACCEPTED';
         queryOptions = {
           select: {
             id: true,
-            follower: {
+            following: {
               select: {
                 id: true,
                 slug: true,
@@ -464,12 +512,31 @@ export class PageService {
         };
       }
 
-      const data = await this.prisma.pageFollower.findMany({
+      const {
+        cursor,
+        limit = 10,
+        orderBy = 'createdAt',
+        orderDirection = 'desc',
+      } = query;
+
+      const cursorObj = this.cursorUtil.buildCursorObject(cursor, orderBy);
+
+      const following = await this.prisma.pageFollower.findMany({
         where,
         ...queryOptions,
+        take: limit,
+        skip: cursor ? 1 : 0,
+        cursor: cursorObj,
+        orderBy: { [orderBy]: orderDirection },
       });
 
-      return data;
+      const nextCursor = this.cursorUtil.getNextCursor(
+        following,
+        limit,
+        orderBy,
+      );
+
+      return { following, nextCursor };
     } catch (error) {
       this.errorUtil.handleError(error);
     }
@@ -508,30 +575,80 @@ export class PageService {
         throw new BadRequestException('Already following');
       }
 
-      if (existing?.status === 'PENDING') {
+      if (
+        existing?.status === 'PENDING' &&
+        followingExists.privacy === 'PUBLIC'
+      ) {
         return existing;
       }
 
-      return await this.prisma.pageFollower.upsert({
-        where: {
-          followerId_followingId: {
+      let pageFollower;
+      if (followingExists.privacy === 'PUBLIC') {
+        pageFollower = await this.prisma.pageFollower.upsert({
+          where: {
+            followerId_followingId: {
+              followerId: pageExists.id,
+              followingId: followingExists.id,
+            },
+          },
+          update: {
+            id: uuid.v7(),
+            status: 'ACCEPTED',
+            deletedAt: null,
+            statusUpdatedAt: new Date(),
+          },
+          create: {
+            id: uuid.v7(),
             followerId: pageExists.id,
             followingId: followingExists.id,
+            status: 'ACCEPTED',
+            deletedAt: null,
+            statusUpdatedAt: new Date(),
           },
+        });
+      } else {
+        pageFollower = await this.prisma.pageFollower.upsert({
+          where: {
+            followerId_followingId: {
+              followerId: pageExists.id,
+              followingId: followingExists.id,
+            },
+          },
+          update: {
+            id: uuid.v7(),
+            status: 'PENDING',
+            deletedAt: null,
+            statusUpdatedAt: null,
+          },
+          create: {
+            id: uuid.v7(),
+            followerId: pageExists.id,
+            followingId: followingExists.id,
+            status: 'PENDING',
+            deletedAt: null,
+            statusUpdatedAt: null,
+          },
+        });
+      }
+
+      this.notificationUtil.createOrUpdateNotification(
+        pageFollower.id,
+        followingExists.id,
+        'FOLLOW',
+        {
+          pageId: pageExists.id,
+          pageSlug: pageExists.slug,
+          pageName: pageExists.name,
+          pageAvatar: pageExists.avatar,
+          message:
+            pageExists.name + pageFollower.statue === 'ACCEPTED'
+              ? 'has followed you.'
+              : 'has sent you a follow request.',
         },
-        update: {
-          status: 'PENDING',
-          deletedAt: null,
-          statusUpdatedAt: null,
-        },
-        create: {
-          followerId: pageExists.id,
-          followingId: followingExists.id,
-          status: 'PENDING',
-          deletedAt: null,
-          statusUpdatedAt: null,
-        },
-      });
+        null,
+      );
+
+      return pageFollower;
     } catch (error) {
       this.errorUtil.handleError(error);
     }
@@ -570,30 +687,80 @@ export class PageService {
         throw new BadRequestException('Already following');
       }
 
-      if (existing?.status === 'PENDING') {
+      if (
+        existing?.status === 'PENDING' &&
+        followingExists.privacy === 'PUBLIC'
+      ) {
         return existing;
       }
 
-      return await this.prisma.pageFollower.upsert({
-        where: {
-          followerId_followingId: {
+      let pageFollower;
+      if (followingExists.privacy === 'PUBLIC') {
+        pageFollower = await this.prisma.pageFollower.upsert({
+          where: {
+            followerId_followingId: {
+              followerId: pageExists.id,
+              followingId: followingExists.id,
+            },
+          },
+          update: {
+            id: uuid.v7(),
+            status: 'ACCEPTED',
+            deletedAt: null,
+            statusUpdatedAt: new Date(),
+          },
+          create: {
+            id: uuid.v7(),
             followerId: pageExists.id,
             followingId: followingExists.id,
+            status: 'ACCEPTED',
+            deletedAt: null,
+            statusUpdatedAt: new Date(),
           },
+        });
+      } else {
+        pageFollower = await this.prisma.pageFollower.upsert({
+          where: {
+            followerId_followingId: {
+              followerId: pageExists.id,
+              followingId: followingExists.id,
+            },
+          },
+          update: {
+            id: uuid.v7(),
+            status: 'PENDING',
+            deletedAt: null,
+            statusUpdatedAt: null,
+          },
+          create: {
+            id: uuid.v7(),
+            followerId: pageExists.id,
+            followingId: followingExists.id,
+            status: 'PENDING',
+            deletedAt: null,
+            statusUpdatedAt: null,
+          },
+        });
+      }
+
+      this.notificationUtil.createOrUpdateNotification(
+        pageFollower.id,
+        followingExists.id,
+        'FOLLOW',
+        {
+          pageId: pageExists.id,
+          pageSlug: pageExists.slug,
+          pageName: pageExists.name,
+          pageAvatar: pageExists.avatar,
+          message:
+            pageExists.name + pageFollower.statue === 'ACCEPTED'
+              ? 'has followed you.'
+              : 'has sent you a follow request.',
         },
-        update: {
-          status: 'PENDING',
-          deletedAt: null,
-          statusUpdatedAt: null,
-        },
-        create: {
-          followerId: pageExists.id,
-          followingId: followingExists.id,
-          status: 'PENDING',
-          deletedAt: null,
-          statusUpdatedAt: null,
-        },
-      });
+        null,
+      );
+
+      return pageFollower;
     } catch (error) {
       this.errorUtil.handleError(error);
     }
@@ -614,7 +781,7 @@ export class PageService {
 
       const followingExists = await this.pageExists(param.followingId);
 
-      await this.prisma.pageFollower.update({
+      const pageFollower = await this.prisma.pageFollower.update({
         where: {
           followerId_followingId: {
             followerId: pageExists.id,
@@ -626,6 +793,11 @@ export class PageService {
           deletedAt: new Date(),
         },
       });
+
+      this.notificationUtil.deleteNotification(
+        pageFollower.id,
+        followingExists.id,
+      );
 
       return {
         message: 'Page following deleted successfully',

@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Put,
+  Query,
   UploadedFiles,
   UseGuards,
   UseInterceptors,
@@ -40,10 +41,16 @@ import {
   UpdatePageResponseDto,
   ValidateHeaderResponseDto,
   GetFollowingResponseDto,
+  GetFollowerRequestQueryDto,
+  GetFollowingRequestQueryDto,
 } from '@app/dtos';
 import { GetUser } from '../auth/decorator';
 import { JwtGuard } from '../auth/guard';
-import { ZodBodyValidationPipe, ZodParamValidationPipe } from '@app/pipes/zod';
+import {
+  ZodBodyValidationPipe,
+  ZodParamValidationPipe,
+  ZodQueryValidationPipe,
+} from '@app/pipes/zod';
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
 @Controller('/page')
@@ -118,13 +125,17 @@ export class PageController {
   }
 
   @Get('{/:pageId}/follower{/:followerId}')
-  @UsePipes(new ZodParamValidationPipe(GetFollowerRequestParamDto))
+  @UsePipes(
+    new ZodParamValidationPipe(GetFollowerRequestParamDto),
+    new ZodQueryValidationPipe(GetFollowerRequestQueryDto),
+  )
   @UseInterceptors(new ZodResponseInterceptor(GetFollowerResponseDto))
   async getFollower(
     @GetUser() user: ValidateHeaderResponseDto,
     @Param() param: GetFollowerRequestParamDto,
+    @Query() query: GetFollowerRequestQueryDto,
   ) {
-    return await this.pageService.getFollower(user, param);
+    return await this.pageService.getFollower(user, param, query);
   }
 
   @Patch('{/:pageId}/follower{/:followerId}')
@@ -152,13 +163,17 @@ export class PageController {
   }
 
   @Get('{/:pageId}/following{/:followingId}')
-  @UsePipes(new ZodParamValidationPipe(GetFollowingRequestParamDto))
+  @UsePipes(
+    new ZodParamValidationPipe(GetFollowingRequestParamDto),
+    new ZodQueryValidationPipe(GetFollowingRequestQueryDto),
+  )
   @UseInterceptors(new ZodResponseInterceptor(GetFollowingResponseDto))
   async getFollowing(
     @GetUser() user: ValidateHeaderResponseDto,
     @Param() param: GetFollowingRequestParamDto,
+    @Query() query: GetFollowingRequestQueryDto,
   ) {
-    return await this.pageService.getFollowing(user, param);
+    return await this.pageService.getFollowing(user, param, query);
   }
 
   @Post('{/:pageId}/following{/:followingId}')
